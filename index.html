@@ -1,0 +1,2616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05070f">
+<meta name="description" content="NEON GRID — a neon circuit-connection puzzle game with 100 levels, daily puzzles, stars, achievements and offline play. Mobile-first HTML5 puzzle game.">
+<meta name="keywords" content="html5 game, puzzle game, javascript game, canvas game, neon game, circuit puzzle, mobile game, offline game, browser game, daily puzzle">
+<meta name="author" content="Sakib Sheikh">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://sakibsheikho69252-nitizen.github.io/neon-grid/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="NEON GRID — Neon Circuit Puzzle">
+<meta property="og:description" content="Rotate tiles, connect the circuit, light every receiver. 100 levels + daily puzzles. Free, offline, no install.">
+<meta property="og:url" content="https://sakibsheikho69252-nitizen.github.io/neon-grid/">
+<meta property="og:image" content="https://sakibsheikho69252-nitizen.github.io/neon-grid/assets/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NEON GRID — Neon Circuit Puzzle">
+<meta name="twitter:description" content="Rotate tiles, connect the circuit, light every receiver. 100 levels + daily puzzles.">
+<meta name="twitter:image" content="https://sakibsheikho69252-nitizen.github.io/neon-grid/assets/social-preview.png">
+
+<!-- PWA / Icons -->
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="apple-touch-icon" href="assets/icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "NEON GRID",
+  "description": "A neon circuit-connection puzzle game with 100 levels and daily puzzles.",
+  "genre": ["Puzzle", "Casual"],
+  "gamePlatform": ["Web browser", "Android", "iOS"],
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "url": "https://sakibsheikho69252-nitizen.github.io/neon-grid/",
+  "image": "https://sakibsheikho69252-nitizen.github.io/neon-grid/assets/social-preview.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+
+<title>NEON GRID — Neon Circuit Puzzle</title>
+<style>
+  :root{
+    --cyan:#2ee6ff;
+    --mag:#ff4fd8;
+    --grn:#3dff9e;
+    --gold:#ffc247;
+    --bg:#05070f;
+    --panel:rgba(16,24,44,0.72);
+    --line:rgba(80,150,230,0.22);
+    --txt:#dbe7ff;
+    --dim:#8ba3c8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;height:100%;width:100%;
+    overflow:hidden;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    overscroll-behavior:none;touch-action:manipulation;
+    -webkit-user-select:none;user-select:none;
+    -webkit-text-size-adjust:100%;
+  }
+  #bg{position:fixed;inset:0;z-index:0;overflow:hidden;
+    background:
+      radial-gradient(1100px 700px at 15% -12%, rgba(46,120,220,0.20), transparent 62%),
+      radial-gradient(900px 620px at 92% 112%, rgba(200,60,200,0.16), transparent 62%),
+      radial-gradient(700px 500px at 50% 50%, rgba(20,60,110,0.18), transparent 70%),
+      #05070f;
+  }
+  #bg::after{
+    content:'';position:absolute;inset:-60%;
+    background-image:
+      linear-gradient(rgba(60,140,220,0.055) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(60,140,220,0.055) 1px,transparent 1px);
+    background-size:46px 46px;
+    animation:drift 44s linear infinite;
+    will-change:transform;
+  }
+  @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(46px,46px,0)}}
+
+  #app{position:fixed;inset:0;z-index:1;}
+
+  .screen{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    opacity:0;pointer-events:none;
+    transform:translateY(12px) scale(0.995);
+    transition:opacity .26s ease, transform .26s cubic-bezier(.22,1,.36,1);
+    overflow:hidden;
+  }
+  .screen.active{opacity:1;pointer-events:auto;transform:none;}
+
+  .scroll{
+    flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    padding:0 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .btn{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:0 20px;border-radius:16px;
+    background:linear-gradient(180deg, rgba(38,56,92,0.85), rgba(20,30,54,0.85));
+    border:1px solid rgba(90,160,240,0.28);
+    color:var(--txt);font-size:17px;font-weight:700;letter-spacing:1.4px;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+    box-shadow:0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    font-family:inherit;
+  }
+  .btn:active{transform:scale(0.965);}
+  .btn:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+  .btn.primary{
+    background:linear-gradient(180deg, rgba(20,140,190,0.95), rgba(10,80,130,0.95));
+    border-color:rgba(70,230,255,0.65);
+    box-shadow:0 0 26px rgba(46,230,255,0.34), 0 6px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+    color:#eafcff;
+  }
+  .btn.ghost{background:rgba(255,255,255,0.035);border-color:rgba(120,170,240,0.16);}
+  .btn.small{min-height:48px;font-size:14px;letter-spacing:1px;padding:0 12px;flex:1;border-radius:14px;}
+  .btn[disabled]{opacity:.38;pointer-events:none;}
+
+  .icon-btn{
+    width:46px;height:46px;min-width:46px;border-radius:14px;
+    background:rgba(255,255,255,0.045);border:1px solid rgba(120,170,240,0.18);
+    color:var(--txt);font-size:16px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-family:inherit;
+    transition:transform .12s ease, background .2s ease;
+  }
+  .icon-btn:active{transform:scale(0.94);}
+  .icon-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
+  .menu-wrap{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;padding:24px 22px calc(24px + env(safe-area-inset-bottom));
+    padding-top:calc(24px + env(safe-area-inset-top));
+  }
+  .logo{
+    font-size:clamp(38px,12vw,64px);font-weight:900;letter-spacing:6px;line-height:1;
+    background:linear-gradient(180deg,#eaffff 0%, #2ee6ff 45%, #2f7fff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 22px rgba(46,230,255,0.5));
+    text-align:center;
+  }
+  .logo span{
+    display:block;
+    background:linear-gradient(180deg,#ffe8ff 0%, #ff4fd8 50%, #a02fff 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 22px rgba(255,79,216,0.45));
+  }
+  .tagline{
+    margin-top:14px;margin-bottom:26px;font-size:11px;letter-spacing:5px;
+    color:var(--dim);text-transform:uppercase;text-align:center;
+  }
+  .menu-btns{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;}
+
+  .topbar{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 14px 10px;
+    padding-top:calc(14px + env(safe-area-inset-top));
+  }
+  .topbar h2{
+    flex:1;margin:0;font-size:15px;font-weight:800;letter-spacing:3px;
+    text-align:center;color:#cfe4ff;text-transform:uppercase;
+  }
+
+  .world-tabs{
+    display:flex;gap:8px;padding:4px 14px 12px;overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .world-tabs::-webkit-scrollbar{display:none;}
+  .wtab{
+    flex:1;min-width:74px;min-height:52px;border-radius:14px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(120,170,240,0.14);
+    color:var(--dim);font-size:11px;font-weight:800;letter-spacing:1px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    cursor:pointer;font-family:inherit;transition:all .18s ease;
+  }
+  .wtab .wt-n{font-size:16px;letter-spacing:0;}
+  .wtab.active{
+    color:#eafcff;border-color:rgba(70,230,255,0.6);
+    background:linear-gradient(180deg,rgba(20,120,170,0.6),rgba(10,60,100,0.6));
+    box-shadow:0 0 20px rgba(46,230,255,0.25);
+  }
+  .wtab.locked{opacity:.42;}
+  .level-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+    padding:2px 0 20px;
+  }
+  @media(min-width:520px){ .level-grid{grid-template-columns:repeat(5,1fr);} }
+  @media(min-width:760px){ .level-grid{grid-template-columns:repeat(7,1fr);} }
+  .lvl{
+    aspect-ratio:1/1;border-radius:14px;
+    background:linear-gradient(180deg,rgba(30,46,78,0.8),rgba(16,24,44,0.8));
+    border:1px solid rgba(90,150,230,0.2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    cursor:pointer;font-family:inherit;color:var(--txt);
+    transition:transform .12s ease, box-shadow .2s ease;
+    position:relative;overflow:hidden;
+  }
+  .lvl:active{transform:scale(0.94);}
+  .lvl .n{font-size:19px;font-weight:800;letter-spacing:0;}
+  .lvl .st{font-size:10px;letter-spacing:1px;color:var(--gold);height:12px;line-height:12px;}
+  .lvl.done{border-color:rgba(70,230,255,0.5);box-shadow:0 0 14px rgba(46,230,255,0.16) inset;}
+  .lvl.locked{opacity:.32;pointer-events:none;background:rgba(255,255,255,0.02);}
+  .lvl:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
+  #s-game{display:flex;flex-direction:column;}
+  .game-top{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px 8px;
+    padding-top:calc(10px + env(safe-area-inset-top));
+  }
+  .hud-mid{flex:1;min-width:0;text-align:center;}
+  .hud-level{font-size:15px;font-weight:800;letter-spacing:2px;color:#eafcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hud-world{font-size:9.5px;letter-spacing:2px;color:var(--dim);margin-top:2px;text-transform:uppercase;}
+  .hud-stats{display:flex;gap:14px;}
+  .hud-stat{text-align:center;min-width:44px;}
+  .hud-stat b{display:block;font-size:15px;font-weight:800;color:#cfeaff;letter-spacing:0.5px;font-variant-numeric:tabular-nums;}
+  .hud-stat small{display:block;font-size:8px;letter-spacing:1.5px;color:var(--dim);margin-top:1px;}
+  .hud-stat.warn b{color:#ff6b6b;}
+
+  .board-wrap{flex:1;min-height:0;position:relative;}
+  #board{position:absolute;left:0;top:0;display:block;touch-action:none;}
+
+  .par-line{
+    text-align:center;font-size:10px;letter-spacing:2px;color:var(--dim);
+    padding:2px 0 0;text-transform:uppercase;
+  }
+  .par-line b{color:var(--gold);}
+
+  .game-bottom{
+    display:flex;gap:10px;
+    padding:10px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px 16px;
+    margin-bottom:12px;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  .panel h3{
+    margin:0 0 10px;font-size:12px;letter-spacing:3px;color:var(--cyan);
+    text-transform:uppercase;font-weight:800;
+  }
+  .panel p{margin:0 0 8px;font-size:14px;line-height:1.6;color:#b9cdea;}
+  .panel p:last-child{margin-bottom:0;}
+  .panel ul{margin:0;padding-left:18px;}
+  .panel li{font-size:14px;line-height:1.7;color:#b9cdea;}
+  .k{color:var(--gold);font-weight:700;}
+
+  .row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 0;border-bottom:1px solid rgba(120,170,240,0.1);
+  }
+  .row:last-child{border-bottom:none;}
+  .row .label{font-size:14px;font-weight:600;letter-spacing:1px;}
+  .row .sub{font-size:11px;color:var(--dim);margin-top:2px;}
+
+  .switch{
+    width:58px;height:34px;border-radius:17px;position:relative;flex-shrink:0;
+    background:rgba(255,255,255,0.08);border:1px solid rgba(120,170,240,0.2);
+    cursor:pointer;transition:background .2s ease, border-color .2s ease;
+  }
+  .switch::after{
+    content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
+    background:#8ba3c8;transition:transform .22s cubic-bezier(.22,1,.36,1), background .2s ease;
+  }
+  .switch.on{background:rgba(46,230,255,0.22);border-color:rgba(46,230,255,0.65);}
+  .switch.on::after{transform:translateX(24px);background:var(--cyan);box-shadow:0 0 12px rgba(46,230,255,0.8);}
+  .switch:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+
+  .ach{
+    display:flex;gap:12px;align-items:center;
+    padding:12px;border-radius:14px;margin-bottom:9px;
+    background:rgba(255,255,255,0.03);border:1px solid rgba(120,170,240,0.12);
+    transition:all .2s ease;
+  }
+  .ach.on{background:linear-gradient(90deg,rgba(46,230,255,0.12),rgba(255,79,216,0.07));border-color:rgba(46,230,255,0.42);}
+  .ach .ic{
+    width:42px;height:42px;border-radius:12px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:19px;
+    background:rgba(255,255,255,0.05);border:1px solid rgba(120,170,240,0.16);
+    color:var(--dim);
+  }
+  .ach.on .ic{background:rgba(46,230,255,0.16);color:var(--cyan);border-color:rgba(46,230,255,0.5);}
+  .ach .t{font-size:13.5px;font-weight:700;letter-spacing:0.6px;}
+  .ach .d{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.4;}
+
+  #modal-back{
+    position:fixed;inset:0;z-index:50;display:none;
+    align-items:center;justify-content:center;padding:20px;
+    background:rgba(3,5,12,0.82);
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  }
+  #modal-back.show{display:flex;animation:fadeIn .22s ease;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    width:100%;max-width:400px;border-radius:24px;padding:24px 20px;
+    background:linear-gradient(180deg,rgba(24,36,64,0.97),rgba(12,18,34,0.97));
+    border:1px solid rgba(90,160,240,0.3);
+    box-shadow:0 0 60px rgba(46,230,255,0.14), 0 24px 60px rgba(0,0,0,0.6);
+    animation:popIn .3s cubic-bezier(.22,1,.36,1);
+    max-height:88vh;overflow-y:auto;
+  }
+  @keyframes popIn{from{transform:scale(0.9) translateY(16px);opacity:0}to{transform:none;opacity:1}}
+  .modal h2{
+    margin:0 0 6px;font-size:22px;font-weight:900;letter-spacing:3px;text-align:center;
+    color:#eafcff;text-transform:uppercase;
+  }
+  .modal .sub{text-align:center;font-size:11px;letter-spacing:3px;color:var(--dim);margin-bottom:18px;text-transform:uppercase;}
+  .modal-btns{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+  .modal-btns .r{display:flex;gap:10px;}
+
+  .stars-row{display:flex;justify-content:center;gap:14px;margin:8px 0 18px;}
+  .star{font-size:42px;line-height:1;color:rgba(255,255,255,0.13);transition:all .3s ease;}
+  .star.on{color:var(--gold);text-shadow:0 0 22px rgba(255,194,71,0.85);}
+  .star.pop{animation:starPop .55s cubic-bezier(.22,1.6,.4,1);}
+  @keyframes starPop{0%{transform:scale(0.4) rotate(-40deg);opacity:0}60%{transform:scale(1.25) rotate(6deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .result-cell{
+    background:rgba(255,255,255,0.04);border:1px solid rgba(120,170,240,0.14);
+    border-radius:14px;padding:12px;text-align:center;
+  }
+  .result-cell b{display:block;font-size:19px;font-weight:800;color:#eafcff;font-variant-numeric:tabular-nums;}
+  .result-cell small{display:block;font-size:9px;letter-spacing:2px;color:var(--dim);margin-top:3px;text-transform:uppercase;}
+
+  #toast-wrap{
+    position:fixed;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));
+    z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;
+    pointer-events:none;padding:0 16px;
+  }
+  .toast{
+    background:linear-gradient(180deg,rgba(30,46,78,0.97),rgba(14,22,40,0.97));
+    border:1px solid rgba(70,230,255,0.4);
+    color:#dff4ff;padding:11px 18px;border-radius:14px;
+    font-size:13px;font-weight:600;letter-spacing:0.8px;
+    box-shadow:0 0 24px rgba(46,230,255,0.22), 0 8px 26px rgba(0,0,0,0.5);
+    animation:toastIn .3s cubic-bezier(.22,1,.36,1);
+    max-width:100%;text-align:center;
+  }
+  .toast.out{animation:toastOut .3s ease forwards;}
+  @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes toastOut{to{transform:translateY(14px);opacity:0}}
+
+  .center-msg{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:24px;text-align:center;color:var(--dim);font-size:13px;letter-spacing:1px;
+  }
+  .reduced *{animation-duration:0.001s !important;animation-iteration-count:1 !important;transition-duration:0.001s !important;}
+
+  @media (prefers-reduced-motion: reduce){
+    #bg::after{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+
+<div id="app">
+
+  <div class="screen active" id="s-menu">
+    <div class="menu-wrap">
+      <div class="logo">NEON<span>GRID</span></div>
+      <div class="tagline">Connect the circuit</div>
+      <div class="menu-btns">
+        <button class="btn primary" data-act="play">PLAY</button>
+        <button class="btn" data-act="levels">LEVELS</button>
+        <button class="btn" data-act="daily">DAILY PUZZLE</button>
+        <button class="btn ghost" data-act="howto">HOW TO PLAY</button>
+        <button class="btn ghost" data-act="settings">SETTINGS</button>
+        <button class="btn ghost" data-act="ach">ACHIEVEMENTS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-levels">
+    <div class="topbar">
+      <button class="icon-btn" data-back="menu" aria-label="Back">&#8592;</button>
+      <h2>Select Level</h2>
+      <div style="width:46px"></div>
+    </div>
+    <div class="world-tabs" id="world-tabs"></div>
+    <div class="scroll">
+      <div class="level-grid" id="level-grid"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-game">
+    <div class="game-top">
+      <button class="icon-btn" id="btn-pause" aria-label="Pause">&#10073;&#10073;</button>
+      <div class="hud-mid">
+        <div class="hud-level" id="hud-level">LEVEL 1</div>
+        <div class="hud-world" id="hud-world">WORLD 1 &middot; BEGINNER</div>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-stat" id="stat-moves-wrap"><b id="hud-moves">0</b><small>MOVES</small></div>
+        <div class="hud-stat" id="stat-time-wrap"><b id="hud-time">0:00</b><small>TIME</small></div>
+      </div>
+    </div>
+    <div class="board-wrap" id="board-wrap">
+      <canvas id="board"></canvas>
+    </div>
+    <div class="par-line" id="par-line">3 STAR TARGET: <b>0</b> MOVES</div>
+    <div class="game-bottom">
+      <button class="btn small" id="btn-undo">UNDO</button>
+      <button class="btn small" id="btn-hint">HINT</button>
+      <button class="btn small" id="btn-reset">RESET</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-howto">
+    <div class="topbar">
+      <button class="icon-btn" data-back="menu" aria-label="Back">&#8592;</button>
+      <h2>How To Play</h2>
+      <div style="width:46px"></div>
+    </div>
+    <div class="scroll">
+      <div class="panel">
+        <h3>Basics</h3>
+        <p><span class="k">Tap any tile</span> to rotate it 90&deg; clockwise. Rotate tiles until every receiver is powered by the energy source.</p>
+        <p>Power flows through tiles only when <span class="k">both</span> touching edges have an open circuit line. A gap breaks the circuit.</p>
+      </div>
+      <div class="panel">
+        <h3>Goal</h3>
+        <p>Every <span class="k">receiver</span> (green ring) must be lit. When the whole circuit is complete, the level is solved.</p>
+      </div>
+      <div class="panel">
+        <h3>Scoring</h3>
+        <p>Earn up to <span class="k">3 stars</span>. Use fewer moves, finish faster, and avoid hints for a perfect score.</p>
+      </div>
+      <div class="panel">
+        <h3>Special Tiles</h3>
+        <ul>
+          <li><span class="k">Source</span> &mdash; the pink pulsing node. Energy starts here.</li>
+          <li><span class="k">Receiver</span> &mdash; green ring. Must be powered.</li>
+          <li><span class="k">Locked</span> &mdash; has a padlock, cannot be rotated.</li>
+          <li><span class="k">One-Way</span> &mdash; energy only flows in the arrow direction.</li>
+          <li><span class="k">Portal</span> &mdash; two linked nodes. Power jumps between them.</li>
+          <li><span class="k">Empty cell</span> &mdash; no tile. Nothing can pass through.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Keyboard (desktop)</h3>
+        <ul>
+          <li><span class="k">Click</span> a tile to rotate it</li>
+          <li><span class="k">Z</span> or <span class="k">U</span> &mdash; Undo</li>
+          <li><span class="k">R</span> &mdash; Reset level</li>
+          <li><span class="k">H</span> &mdash; Hint</li>
+          <li><span class="k">Esc</span> &mdash; Pause</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-settings">
+    <div class="topbar">
+      <button class="icon-btn" data-back="menu" aria-label="Back">&#8592;</button>
+      <h2>Settings</h2>
+      <div style="width:46px"></div>
+    </div>
+    <div class="scroll">
+      <div class="panel">
+        <div class="row">
+          <div><div class="label">Sound</div><div class="sub">Tiles, rewards and UI</div></div>
+          <div class="switch" id="sw-sound" tabindex="0" role="switch" aria-label="Sound"></div>
+        </div>
+        <div class="row">
+          <div><div class="label">Vibration</div><div class="sub">Haptic feedback on supported devices</div></div>
+          <div class="switch" id="sw-vib" tabindex="0" role="switch" aria-label="Vibration"></div>
+        </div>
+        <div class="row">
+          <div><div class="label">Reduced Effects</div><div class="sub">Fewer particles and animations</div></div>
+          <div class="switch" id="sw-reduced" tabindex="0" role="switch" aria-label="Reduced effects"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Statistics</h3>
+        <p id="stats-text">No data yet.</p>
+      </div>
+      <div class="panel">
+        <h3>Danger Zone</h3>
+        <button class="btn ghost" id="btn-reset-progress" style="width:100%;">RESET ALL PROGRESS</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-ach">
+    <div class="topbar">
+      <button class="icon-btn" data-back="menu" aria-label="Back">&#8592;</button>
+      <h2>Achievements</h2>
+      <div style="width:46px"></div>
+    </div>
+    <div class="scroll">
+      <div class="panel" style="padding:12px 16px;">
+        <div style="font-size:12px;letter-spacing:2px;color:var(--dim);">UNLOCKED</div>
+        <div style="font-size:26px;font-weight:800;color:var(--cyan);margin-top:4px;" id="ach-count">0 / 0</div>
+      </div>
+      <div id="ach-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-back"><div class="modal" id="modal"></div></div>
+<div id="toast-wrap"></div>
+
+<script>
+(function(){
+'use strict';
+
+var $ = function(s){ return document.querySelector(s); };
+var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function mulberry32(a){
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s){
+  var h = 2166136261;
+  for(var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function popcount(x){ var c=0; while(x){ c += x & 1; x >>= 1; } return c; }
+function shuffle(arr, rng){
+  for(var i=arr.length-1;i>0;i--){
+    var j = (rng() * (i+1)) | 0;
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function roundRect(c,x,y,w,h,r){
+  r = Math.min(r, w/2, h/2);
+  if(r < 0) r = 0;
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+}
+function fmtTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  var m = Math.floor(sec/60);
+  var s = sec % 60;
+  return m + ':' + (s<10?'0':'') + s;
+}
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+
+var DX = [0,1,0,-1];
+var DY = [-1,0,1,0];
+var OPP = [2,3,0,1];
+
+function rotMask(m, t){
+  t = ((t % 4) + 4) % 4;
+  var r = m & 15;
+  for(var i=0;i<t;i++){
+    r = ((r << 1) | (r >> 3)) & 15;
+  }
+  return r;
+}
+function dirBetween(N, a, b){
+  var ax = a % N, ay = (a / N) | 0;
+  var bx = b % N, by = (b / N) | 0;
+  if(bx > ax) return 1;
+  if(bx < ax) return 3;
+  if(by > ay) return 2;
+  return 0;
+}
+
+var SAVE_KEY = 'neongrid_save_v1';
+
+var Save = {
+  data: null,
+  defaults: function(){
+    return {
+      unlocked: 1,
+      levels: {},
+      daily: {},
+      settings: { sound: true, vibration: true, reduced: false },
+      achievements: {},
+      stats: {
+        plays: 0, levelsDone: 0, totalMoves: 0, totalTime: 0,
+        hintsUsed: 0, dailies: 0, noHintCompletions: 0,
+        threeStarStreak: 0, bestThreeStarStreak: 0, undosUsed: 0
+      },
+      lastLevel: 1
+    };
+  },
+  sanitize: function(raw){
+    var d = this.defaults();
+    if(!raw || typeof raw !== 'object') return d;
+    if(typeof raw.unlocked === 'number' && isFinite(raw.unlocked)){
+      d.unlocked = clamp(Math.floor(raw.unlocked), 1, 100);
+    }
+    if(raw.levels && typeof raw.levels === 'object'){
+      for(var k in raw.levels){
+        if(!Object.prototype.hasOwnProperty.call(raw.levels, k)) continue;
+        var lv = parseInt(k, 10);
+        if(!isFinite(lv) || lv < 1 || lv > 100) continue;
+        var rec = raw.levels[k];
+        if(!rec || typeof rec !== 'object') continue;
+        d.levels[lv] = {
+          stars: clamp(Math.floor(Number(rec.stars) || 0), 0, 3),
+          time: Math.max(0, Number(rec.time) || 0),
+          moves: Math.max(0, Math.floor(Number(rec.moves) || 0))
+        };
+      }
+    }
+    if(raw.daily && typeof raw.daily === 'object'){
+      for(var k2 in raw.daily){
+        if(!Object.prototype.hasOwnProperty.call(raw.daily, k2)) continue;
+        if(!/^\d{8}$/.test(k2)) continue;
+        var dr = raw.daily[k2];
+        if(!dr || typeof dr !== 'object') continue;
+        d.daily[k2] = {
+          done: !!dr.done,
+          time: Math.max(0, Number(dr.time) || 0),
+          moves: Math.max(0, Math.floor(Number(dr.moves) || 0))
+        };
+      }
+    }
+    if(raw.settings && typeof raw.settings === 'object'){
+      d.settings.sound = raw.settings.sound !== false;
+      d.settings.vibration = raw.settings.vibration !== false;
+      d.settings.reduced = raw.settings.reduced === true;
+    }
+    if(raw.achievements && typeof raw.achievements === 'object'){
+      for(var k3 in raw.achievements){
+        if(Object.prototype.hasOwnProperty.call(raw.achievements, k3) && raw.achievements[k3]){
+          d.achievements[k3] = true;
+        }
+      }
+    }
+    if(raw.stats && typeof raw.stats === 'object'){
+      var s = raw.stats;
+      d.stats.plays = Math.max(0, Math.floor(Number(s.plays) || 0));
+      d.stats.levelsDone = Math.max(0, Math.floor(Number(s.levelsDone) || 0));
+      d.stats.totalMoves = Math.max(0, Math.floor(Number(s.totalMoves) || 0));
+      d.stats.totalTime = Math.max(0, Number(s.totalTime) || 0);
+      d.stats.hintsUsed = Math.max(0, Math.floor(Number(s.hintsUsed) || 0));
+      d.stats.dailies = Math.max(0, Math.floor(Number(s.dailies) || 0));
+      d.stats.noHintCompletions = Math.max(0, Math.floor(Number(s.noHintCompletions) || 0));
+      d.stats.threeStarStreak = Math.max(0, Math.floor(Number(s.threeStarStreak) || 0));
+      d.stats.bestThreeStarStreak = Math.max(0, Math.floor(Number(s.bestThreeStarStreak) || 0));
+      d.stats.undosUsed = Math.max(0, Math.floor(Number(s.undosUsed) || 0));
+    }
+    if(typeof raw.lastLevel === 'number'){
+      d.lastLevel = clamp(Math.floor(raw.lastLevel), 1, 100);
+    }
+    return d;
+  },
+  load: function(){
+    var raw = null;
+    try{
+      var s = localStorage.getItem(SAVE_KEY);
+      if(s) raw = JSON.parse(s);
+    }catch(e){ raw = null; }
+    this.data = this.sanitize(raw);
+  },
+  save: function(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(this.data)); }catch(e){}
+  },
+  starsFor: function(level){
+    var r = this.data.levels[level];
+    return r ? r.stars : 0;
+  },
+  totalStars: function(){
+    var t = 0;
+    for(var k in this.data.levels){
+      if(Object.prototype.hasOwnProperty.call(this.data.levels, k)) t += this.data.levels[k].stars || 0;
+    }
+    return t;
+  }
+};
+Save.load();
+
+var Sound = {
+  ctx: null,
+  ready: false,
+  init: function(){
+    if(this.ctx) return;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(AC) this.ctx = new AC();
+      this.ready = !!this.ctx;
+    }catch(e){ this.ctx = null; this.ready = false; }
+  },
+  resume: function(){
+    if(this.ctx && this.ctx.state === 'suspended'){
+      try{ this.ctx.resume(); }catch(e){}
+    }
+  },
+  tone: function(freq, dur, type, vol, endFreq, delay){
+    if(!Save.data.settings.sound) return;
+    if(!this.ctx) return;
+    this.resume();
+    var ctx = this.ctx;
+    var t0 = ctx.currentTime + (delay || 0);
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t0);
+    if(endFreq && endFreq > 0){
+      try{ o.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), t0 + dur); }catch(e){}
+    }
+    var v = (vol === undefined ? 0.14 : vol);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(v, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start(t0);
+    o.stop(t0 + dur + 0.03);
+  },
+  noise: function(dur, vol, freq){
+    if(!Save.data.settings.sound || !this.ctx) return;
+    this.resume();
+    var ctx = this.ctx;
+    var t0 = ctx.currentTime;
+    var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var i=0;i<len;i++){ d[i] = (Math.random()*2-1) * (1 - i/len); }
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    var f = ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = freq || 900;
+    f.Q.value = 1.2;
+    var g = ctx.createGain();
+    g.gain.value = vol || 0.08;
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start(t0);
+  },
+  rotate: function(){ this.tone(520, 0.055, 'triangle', 0.075, 760); },
+  click:  function(){ this.tone(680, 0.045, 'square', 0.04, 900); },
+  connect:function(){ this.tone(880, 0.12, 'sine', 0.09, 1320); },
+  error:  function(){ this.tone(150, 0.16, 'sawtooth', 0.075, 90); },
+  hint:   function(){ this.tone(1180, 0.10, 'sine', 0.075, 1560); this.tone(1560,0.10,'sine',0.05,1960,0.08); },
+  star:   function(){ this.tone(1320, 0.14, 'sine', 0.09, 1760); },
+  complete: function(){
+    var self = this;
+    var notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach(function(n, i){ self.tone(n, 0.28, 'sine', 0.10, n*1.005, i*0.085); });
+  },
+  daily: function(){
+    var self = this;
+    var notes = [659.25, 830.6, 987.77, 1318.5, 1661.2];
+    notes.forEach(function(n, i){ self.tone(n, 0.32, 'triangle', 0.085, n, i*0.08); });
+  }
+};
+
+function vibrate(pattern){
+  if(!Save.data.settings.vibration) return;
+  try{
+    if(navigator.vibrate) navigator.vibrate(pattern);
+  }catch(e){}
+}
+
+var WORLD_NAMES = ['BEGINNER','EASY','MEDIUM','HARD','EXPERT'];
+
+function levelSpec(level){
+  var world = Math.min(5, Math.floor((level-1)/20) + 1);
+  var iw = (level - 1) % 20;
+  var half = iw < 10 ? 0 : 1;
+  var sizeTable = [[4,5],[5,6],[6,7],[7,8],[8,8]];
+  var size = sizeTable[world-1][half];
+  var prog = iw / 19;
+
+  var fill;
+  if(level <= 2) fill = 0.34;
+  else if(level <= 5) fill = 0.44;
+  else fill = 0.52 + 0.28 * prog;
+
+  var sources = 1;
+  if(world >= 3 && iw >= 12) sources = 2;
+  if(world >= 5 && iw >= 14) sources = 3;
+
+  var lockedChance = world >= 2 ? 0.06 + 0.03 * (world - 2) : 0;
+  var onewayChance = world >= 3 ? 0.14 + 0.06 * (world - 3) : 0;
+  var portals = world >= 4 ? 1 : 0;
+  var loopChance = 0.05 + 0.035 * world;
+  var timed = world >= 4 && (iw % 6 === 5);
+  var moveLimit = world >= 2 && (iw % 7 === 6);
+  var maxNodes = 2 + world;
+
+  return {
+    world: world, size: size, fill: fill, sources: sources,
+    lockedChance: lockedChance, onewayChance: onewayChance,
+    portals: portals, loopChance: loopChance, timed: timed,
+    moveLimit: moveLimit, maxNodes: maxNodes
+  };
+}
+
+function growRegion(N, target, rng, forbidden){
+  var total = N * N;
+  var inRegion = new Uint8Array(total);
+  var set = new Set();
+  var all = [];
+  for(var i=0;i<total;i++){
+    if(forbidden && forbidden.has(i)) continue;
+    all.push(i);
+  }
+  if(!all.length) return set;
+  var start = all[(rng() * all.length) | 0];
+  set.add(start);
+  inRegion[start] = 1;
+
+  var guard = 0;
+  while(set.size < target && guard++ < 4000){
+    var fr = [];
+    var arr = Array.from(set);
+    for(var a=0;a<arr.length;a++){
+      var idx = arr[a];
+      var x = idx % N, y = (idx / N) | 0;
+      for(var d=0;d<4;d++){
+        var nx = x + DX[d], ny = y + DY[d];
+        if(nx<0||ny<0||nx>=N||ny>=N) continue;
+        var ni = ny*N + nx;
+        if(inRegion[ni]) continue;
+        if(forbidden && forbidden.has(ni)) continue;
+        fr.push(ni);
+      }
+    }
+    if(!fr.length) break;
+    var pick = fr[(rng() * fr.length) | 0];
+    if(inRegion[pick]) continue;
+    set.add(pick);
+    inRegion[pick] = 1;
+  }
+  return set;
+}
+
+function buildTree(N, regionSet, root, rng){
+  var total = N * N;
+  var par = new Int32Array(total).fill(-1);
+  var visited = new Uint8Array(total);
+  var order = [root];
+  var stack = [root];
+  visited[root] = 1;
+
+  var guard = 0;
+  while(stack.length && guard++ < 100000){
+    var cur = stack[stack.length - 1];
+    var x = cur % N, y = (cur / N) | 0;
+    var nbrs = [];
+    for(var d=0;d<4;d++){
+      var nx = x + DX[d], ny = y + DY[d];
+      if(nx<0||ny<0||nx>=N||ny>=N) continue;
+      var ni = ny*N + nx;
+      if(regionSet.has(ni) && !visited[ni]) nbrs.push([ni,d]);
+    }
+    if(!nbrs.length){ stack.pop(); continue; }
+    var pick = nbrs[(rng() * nbrs.length) | 0];
+    var nn = pick[0];
+    visited[nn] = 1;
+    par[nn] = cur;
+    order.push(nn);
+    stack.push(nn);
+  }
+  return { parent: par, order: order };
+}
+
+function generatePuzzle(level, seed){
+  var rng = mulberry32((seed >>> 0) || 9182736);
+  var spec = levelSpec(level);
+  var N = spec.size;
+  var total = N * N;
+
+  var conn = new Int32Array(total);
+  var treeConn = new Int32Array(total);
+  var active = new Uint8Array(total);
+  var parent = new Int32Array(total).fill(-1);
+
+  var targetCells = clamp(Math.round(total * spec.fill), 4, total - 1);
+  var usePortals = spec.portals > 0;
+  var regionA, treeA, sourceRoot;
+  var regionB = null, portalA = -1, portalB = -1;
+
+  var wantA = usePortals ? Math.max(6, Math.round(targetCells * 0.62)) : targetCells;
+  regionA = growRegion(N, wantA, rng, null);
+  if(regionA.size < 3){
+    regionA = growRegion(N, Math.min(total - 1, 5), rng, null);
+  }
+  var arrA = Array.from(regionA);
+  sourceRoot = arrA[(rng() * arrA.length) | 0];
+
+  treeA = buildTree(N, regionA, sourceRoot, rng);
+  for(var i=0;i<treeA.order.length;i++){
+    var c = treeA.order[i];
+    var p = treeA.parent[c];
+    if(p >= 0){
+      var dd = dirBetween(N, p, c);
+      conn[p] |= (1 << dd);
+      conn[c] |= (1 << OPP[dd]);
+      parent[c] = p;
+    }
+  }
+  arrA.forEach(function(k){ active[k] = 1; });
+
+  if(usePortals){
+    var leafCandA = [];
+    for(var ai=0; ai<arrA.length; ai++){
+      var cc = arrA[ai];
+      if(cc !== sourceRoot && popcount(conn[cc]) === 1) leafCandA.push(cc);
+    }
+    if(leafCandA.length > 0){
+      var wantB = Math.max(4, targetCells - regionA.size);
+      var rb = growRegion(N, wantB, rng, regionA);
+      if(rb.size >= 3){
+        regionB = rb;
+        var arrB = Array.from(rb);
+        portalB = arrB[(rng() * arrB.length) | 0];
+        var treeB = buildTree(N, rb, portalB, rng);
+        for(var bi=0; bi<treeB.order.length; bi++){
+          var c2 = treeB.order[bi];
+          var p2 = treeB.parent[c2];
+          if(p2 >= 0){
+            var d2 = dirBetween(N, p2, c2);
+            conn[p2] |= (1 << d2);
+            conn[c2] |= (1 << OPP[d2]);
+            parent[c2] = p2;
+          }
+        }
+        arrB.forEach(function(k){ active[k] = 1; });
+        portalA = leafCandA[(rng() * leafCandA.length) | 0];
+      }
+    }
+  }
+  if(portalA < 0 || portalB < 0){ portalA = -1; portalB = -1; regionB = null; }
+
+  for(var ti=0; ti<total; ti++) treeConn[ti] = conn[ti];
+
+  for(var y=0;y<N;y++){
+    for(var x=0;x<N;x++){
+      var ii = y*N + x;
+      if(!active[ii]) continue;
+      for(var d3=0; d3<4; d3++){
+        var nx3 = x + DX[d3], ny3 = y + DY[d3];
+        if(nx3<0||ny3<0||nx3>=N||ny3>=N) continue;
+        var jj = ny3*N + nx3;
+        if(!active[jj]) continue;
+        if(conn[ii] & (1 << d3)) continue;
+        if(rng() < spec.loopChance){
+          conn[ii] |= (1 << d3);
+          conn[jj] |= (1 << OPP[d3]);
+        }
+      }
+    }
+  }
+
+  function computeLeaves(){
+    var L = [];
+    for(var q=0;q<total;q++){
+      if(active[q] && popcount(conn[q]) === 1) L.push(q);
+    }
+    return L;
+  }
+  var leaves = computeLeaves();
+  var guardL = 0;
+  while(leaves.length > spec.maxNodes && guardL++ < 300){
+    var shuffled = shuffle(leaves.slice(), rng);
+    var progressed = false;
+    for(var si=0; si<shuffled.length && !progressed; si++){
+      var Lf = shuffled[si];
+      if(Lf === portalA || Lf === portalB) continue;
+      var lx = Lf % N, ly = (Lf / N) | 0;
+      for(var d4=0; d4<4; d4++){
+        var nx4 = lx + DX[d4], ny4 = ly + DY[d4];
+        if(nx4<0||ny4<0||nx4>=N||ny4>=N) continue;
+        var j4 = ny4*N + nx4;
+        if(!active[j4]) continue;
+        if(conn[Lf] & (1 << d4)) continue;
+        conn[Lf] |= (1 << d4);
+        conn[j4] |= (1 << OPP[d4]);
+        progressed = true;
+        break;
+      }
+    }
+    if(!progressed) break;
+    leaves = computeLeaves();
+  }
+
+  var srcSet = new Set();
+  var recvSet = new Set();
+  srcSet.add(sourceRoot);
+
+  for(var li=0; li<leaves.length; li++){
+    var L2 = leaves[li];
+    if(L2 === sourceRoot || L2 === portalA || L2 === portalB) continue;
+    recvSet.add(L2);
+  }
+
+  var extraSources = spec.sources - 1;
+  var recvArr = Array.from(recvSet);
+  shuffle(recvArr, rng);
+  while(extraSources > 0 && recvArr.length > 1){
+    var sr = recvArr.pop();
+    recvSet.delete(sr);
+    srcSet.add(sr);
+    extraSources--;
+  }
+
+  if(recvSet.size === 0){
+    for(var gi=0; gi<total; gi++){
+      if(active[gi] && !srcSet.has(gi) && gi !== portalA && gi !== portalB){
+        recvSet.add(gi);
+        break;
+      }
+    }
+  }
+
+  var tiles = new Array(total).fill(null);
+  for(var t2=0; t2<total; t2++){
+    if(!active[t2]) continue;
+    var m = conn[t2];
+    var pc = popcount(m);
+    var type;
+    if(srcSet.has(t2)) type = 'source';
+    else if(recvSet.has(t2)) type = 'receiver';
+    else if(t2 === portalA || t2 === portalB) type = 'portal';
+    else if(pc === 2) type = (m === 5 || m === 10) ? 'straight' : 'corner';
+    else if(pc === 3) type = 'tee';
+    else if(pc === 4) type = 'cross';
+    else if(pc === 1) type = 'receiver';
+    else type = 'block';
+
+    tiles[t2] = {
+      type: type,
+      baseMask: m,
+      r: 0,
+      angle: 0,
+      animFrom: 0,
+      animTo: 0,
+      animStart: 0,
+      locked: false,
+      solutionR: 0,
+      portalId: (t2 === portalA || t2 === portalB) ? 1 : 0
+    };
+  }
+
+  if(spec.onewayChance > 0){
+    for(var w=0; w<total; w++){
+      var tw = tiles[w];
+      if(!tw || tw.type !== 'straight') continue;
+      if(popcount(treeConn[w]) !== 2) continue;
+      if(popcount(conn[w]) !== 2) continue;
+      if(rng() > spec.onewayChance) continue;
+
+      var pw = parent[w];
+      if(pw < 0) continue;
+      var inDir = -1, childIdx = -1;
+      for(var d5=0; d5<4; d5++){
+        if(!(treeConn[w] & (1 << d5))) continue;
+        var wx = w % N, wy = (w / N) | 0;
+        var nx5 = wx + DX[d5], ny5 = wy + DY[d5];
+        if(nx5<0||ny5<0||nx5>=N||ny5>=N) continue;
+        var j5 = ny5*N + nx5;
+        if(j5 === pw) inDir = d5;
+        else childIdx = j5;
+      }
+      if(inDir < 0 || childIdx < 0) continue;
+      if(parent[childIdx] !== w) continue;
+
+      var outDir = -1;
+      for(var d6=0; d6<4; d6++){
+        if((treeConn[w] & (1 << d6)) && d6 !== inDir) outDir = d6;
+      }
+      if(outDir !== OPP[inDir]) continue;
+
+      tw.type = 'oneway';
+      tw.baseMask = 5;
+      tw.solutionR = outDir;
+    }
+  }
+
+  if(spec.lockedChance > 0){
+    for(var lk=0; lk<total; lk++){
+      var tl = tiles[lk];
+      if(!tl) continue;
+      if(tl.type === 'source' || tl.type === 'receiver' || tl.type === 'portal' || tl.type === 'oneway') continue;
+      if(rng() < spec.lockedChance) tl.locked = true;
+    }
+  }
+
+  var srcIdx = [], recvIdx = [], portalPartner = new Int32Array(total).fill(-1);
+  for(var q2=0; q2<total; q2++){
+    var tq = tiles[q2];
+    if(!tq) continue;
+    if(tq.type === 'source') srcIdx.push(q2);
+    if(tq.type === 'receiver') recvIdx.push(q2);
+  }
+  if(portalA >= 0 && portalB >= 0){
+    portalPartner[portalA] = portalB;
+    portalPartner[portalB] = portalA;
+  }
+
+  var rotatable = [];
+  for(var r2=0; r2<total; r2++){
+    var tr = tiles[r2];
+    if(!tr || tr.locked || tr.type === 'block') continue;
+    rotatable.push(r2);
+  }
+
+  function validRs(t){
+    if(t.type === 'oneway') return [t.solutionR & 3];
+    var base = t.baseMask & 15;
+    var sol = rotMask(base, t.solutionR);
+    var out = [];
+    for(var rr=0; rr<4; rr++){
+      if(rotMask(base, rr) === sol) out.push(rr);
+    }
+    return out;
+  }
+  function minDist(t){
+    var vs = validRs(t);
+    var best = 4;
+    for(var vi=0; vi<vs.length; vi++){
+      var dd2 = ((vs[vi] - t.r) % 4 + 4) % 4;
+      if(dd2 < best) best = dd2;
+    }
+    return best;
+  }
+  function computePar(){
+    var sum = 0;
+    for(var pi=0; pi<rotatable.length; pi++){
+      sum += minDist(tiles[rotatable[pi]]);
+    }
+    return sum;
+  }
+
+  var minPar = Math.max(2, Math.round(rotatable.length * 0.45));
+  var par = 0;
+  var attempts = 0;
+  do {
+    for(var sc=0; sc<rotatable.length; sc++){
+      var ts = tiles[rotatable[sc]];
+      ts.r = (rng() * 4) | 0;
+    }
+    par = computePar();
+    attempts++;
+  } while((par < minPar || par === 0) && attempts < 40);
+
+  for(var az=0; az<total; az++){
+    var ta = tiles[az];
+    if(!ta) continue;
+    ta.angle = ta.r;
+    ta.animFrom = ta.r;
+    ta.animTo = ta.r;
+    ta.animStart = 0;
+  }
+
+  return {
+    N: N,
+    tiles: tiles,
+    srcIdx: srcIdx,
+    recvIdx: recvIdx,
+    portalPartner: portalPartner,
+    rotatable: rotatable,
+    par: par,
+    spec: spec,
+    validRs: validRs
+  };
+}
+
+var Game = {
+  N: 0,
+  tiles: [],
+  srcIdx: [],
+  recvIdx: [],
+  portalPartner: null,
+  rotatable: [],
+  par: 0,
+  validRsFn: null,
+  spec: null,
+  level: 1,
+  isDaily: false,
+  dailyKey: '',
+  moves: 0,
+  hints: 0,
+  elapsed: 0,
+  timerRunning: false,
+  timerStart: 0,
+  timerAccum: 0,
+  timerInterval: 0,
+  history: [],
+  solved: false,
+  paused: false,
+  energized: null,
+  hintTile: -1,
+  hintUntil: 0,
+  moveLimit: 0,
+  timeLimit: 0,
+  remaining: 0,
+  lastTick: 0,
+  failed: false
+};
+
+function computeEnergized(){
+  var N = Game.N, total = N * N;
+  var tiles = Game.tiles;
+  var vis = new Uint8Array(total);
+  var q = [];
+  var head = 0;
+  for(var si=0; si<Game.srcIdx.length; si++){
+    var s = Game.srcIdx[si];
+    if(!vis[s]){ vis[s] = 1; q.push(s); }
+  }
+  var guard = 0;
+  while(head < q.length && guard++ < 20000){
+    var i = q[head++];
+    var t = tiles[i];
+    if(!t) continue;
+
+    if(t.type === 'portal'){
+      var pt = Game.portalPartner[i];
+      if(pt >= 0 && !vis[pt]){ vis[pt] = 1; q.push(pt); }
+    }
+
+    var m = rotMask(t.baseMask, t.r);
+    var outM = (t.type === 'oneway') ? rotMask(1, t.r) : m;
+    if(outM === 0) continue;
+
+    var x = i % N, y = (i / N) | 0;
+    for(var d=0; d<4; d++){
+      if(!(outM & (1 << d))) continue;
+      var nx = x + DX[d], ny = y + DY[d];
+      if(nx<0||ny<0||nx>=N||ny>=N) continue;
+      var j = ny*N + nx;
+      var tj = tiles[j];
+      if(!tj) continue;
+      var mj = rotMask(tj.baseMask, tj.r);
+      var inM = (tj.type === 'oneway') ? rotMask(4, tj.r) : mj;
+      if(!(inM & (1 << OPP[d]))) continue;
+      if(vis[j]) continue;
+      vis[j] = 1;
+      q.push(j);
+    }
+  }
+  Game.energized = vis;
+}
+
+function isSolved(){
+  if(!Game.energized) return false;
+  if(Game.recvIdx.length === 0) return false;
+  for(var i=0;i<Game.recvIdx.length;i++){
+    if(!Game.energized[Game.recvIdx[i]]) return false;
+  }
+  return true;
+}
+
+var particles = [];
+function spawnParticles(x, y, count, color, speed, life){
+  if(Save.data.settings.reduced) count = Math.min(count, 5);
+  var cap = Save.data.settings.reduced ? 40 : 160;
+  for(var i=0;i<count;i++){
+    if(particles.length >= cap) break;
+    var a = Math.random() * Math.PI * 2;
+    var sp = speed * (0.4 + Math.random() * 0.9);
+    particles.push({
+      x: x, y: y,
+      vx: Math.cos(a) * sp,
+      vy: Math.sin(a) * sp,
+      life: life * (0.6 + Math.random() * 0.7),
+      max: life,
+      size: 1.5 + Math.random() * 2.6,
+      color: color
+    });
+  }
+}
+function updateParticles(dt){
+  for(var i=particles.length-1; i>=0; i--){
+    var p = particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= 0.94;
+    p.vy *= 0.94;
+    p.vy += 22 * dt;
+    p.life -= dt;
+    if(p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+var cvs = document.getElementById('board');
+var ctx = cvs.getContext('2d');
+var CW = 0, CH = 0, DPR = 1;
+var boardGeom = { bs: 0, cs: 0, ox: 0, oy: 0 };
+
+function resizeCanvas(){
+  var wrap = document.getElementById('board-wrap');
+  if(!wrap) return;
+  var r = wrap.getBoundingClientRect();
+  var w = Math.max(1, Math.round(r.width));
+  var h = Math.max(1, Math.round(r.height));
+  if(w === CW && h === CH && cvs.width > 0) return;
+  CW = w; CH = h;
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  cvs.width = Math.round(CW * DPR);
+  cvs.height = Math.round(CH * DPR);
+  cvs.style.width = CW + 'px';
+  cvs.style.height = CH + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  computeGeom();
+}
+
+function computeGeom(){
+  var N = Game.N || 4;
+  var pad = 8;
+  var bs = Math.min(CW - pad*2, CH - pad*2);
+  if(bs < 40) bs = Math.min(CW, CH);
+  boardGeom.bs = bs;
+  boardGeom.cs = bs / N;
+  boardGeom.ox = (CW - bs) / 2;
+  boardGeom.oy = (CH - bs) / 2;
+}
+
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+function armPoint(cs, inset, d){
+  var L = cs/2 - inset;
+  var a = d * Math.PI/2 - Math.PI/2;
+  return [Math.cos(a) * L, Math.sin(a) * L];
+}
+
+function drawTilePath(cs, inset, mask){
+  var dirs = [];
+  for(var d=0; d<4; d++) if(mask & (1 << d)) dirs.push(d);
+  if(dirs.length === 0) return [];
+
+  var paths = [];
+  if(dirs.length === 2 && OPP[dirs[0]] === dirs[1]){
+    var p0 = armPoint(cs, inset, dirs[0]);
+    var p1 = armPoint(cs, inset, dirs[1]);
+    paths.push([p0, p1]);
+  } else {
+    for(var i=0;i<dirs.length;i++){
+      paths.push([[0,0], armPoint(cs, inset, dirs[i])]);
+    }
+  }
+  return paths;
+}
+
+function render(now){
+  if(!Game.N || CW <= 0) return;
+  var N = Game.N;
+  var bs = boardGeom.bs, cs = boardGeom.cs;
+  var ox = boardGeom.ox, oy = boardGeom.oy;
+
+  ctx.clearRect(0, 0, CW, CH);
+
+  ctx.save();
+  roundRect(ctx, ox - 7, oy - 7, bs + 14, bs + 14, 18);
+  ctx.fillStyle = 'rgba(10,17,33,0.72)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(70,150,220,0.24)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  var reduced = Save.data.settings.reduced;
+
+  for(var i=0; i<N*N; i++){
+    var x = i % N, y = (i / N) | 0;
+    drawCell(ox + x*cs, oy + y*cs, cs, i, now, reduced);
+  }
+
+  if(Game.hintTile >= 0 && now < Game.hintUntil){
+    var hx = ox + (Game.hintTile % N) * cs;
+    var hy = oy + (((Game.hintTile / N) | 0)) * cs;
+    var pulse = 0.5 + 0.5 * Math.sin(now * 0.008);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,194,71,' + (0.55 + pulse*0.45) + ')';
+    ctx.lineWidth = 3 + pulse * 2;
+    roundRect(ctx, hx + 3, hy + 3, cs - 6, cs - 6, cs * 0.16);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if(particles.length){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for(var pi=0; pi<particles.length; pi++){
+      var p = particles[pi];
+      var a = Math.max(0, p.life / p.max);
+      ctx.globalAlpha = a * 0.9;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * (0.5 + a*0.6), 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function drawCell(px, py, cs, idx, now, reduced){
+  var t = Game.tiles[idx];
+  var inset = cs * 0.055;
+
+  roundRect(ctx, px + inset, py + inset, cs - inset*2, cs - inset*2, cs * 0.15);
+
+  if(!t){
+    ctx.fillStyle = 'rgba(255,255,255,0.012)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(110,150,210,0.055)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.save();
+    ctx.beginPath();
+    roundRect(ctx, px + inset, py + inset, cs - inset*2, cs - inset*2, cs * 0.15);
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(110,150,210,0.045)';
+    ctx.lineWidth = 1;
+    var step = cs * 0.22;
+    for(var hx = -cs; hx < cs*2; hx += step){
+      ctx.beginPath();
+      ctx.moveTo(px + hx, py + cs);
+      ctx.lineTo(px + hx + cs, py);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
+  var energized = !!(Game.energized && Game.energized[idx]);
+  var isSource = t.type === 'source';
+  var isRecv = t.type === 'receiver';
+  var isPortal = t.type === 'portal';
+
+  if(energized){
+    ctx.fillStyle = isSource ? 'rgba(90,20,80,0.42)' : (isRecv ? 'rgba(15,80,60,0.42)' : 'rgba(18,70,105,0.42)');
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.035)';
+  }
+  ctx.fill();
+
+  ctx.strokeStyle = energized
+    ? (isSource ? 'rgba(255,90,214,0.5)' : (isRecv ? 'rgba(61,255,158,0.5)' : 'rgba(46,230,255,0.42)'))
+    : 'rgba(120,165,220,0.10)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  var cx = px + cs/2, cy = py + cs/2;
+
+  var anim = t.animTo - t.animFrom;
+  if(anim !== 0){
+    var pr = (now - t.animStart) / 150;
+    if(pr >= 1){ t.angle = t.animTo; }
+    else { t.angle = t.animFrom + anim * easeOutCubic(pr); }
+  } else {
+    t.angle = t.animTo;
+  }
+
+  var col, glowCol;
+  if(energized){
+    if(isSource){ col = '#ff6ade'; glowCol = 'rgba(255,90,214,0.30)'; }
+    else if(isRecv){ col = '#5cffae'; glowCol = 'rgba(61,255,158,0.30)'; }
+    else if(isPortal){ col = '#c88bff'; glowCol = 'rgba(190,120,255,0.30)'; }
+    else { col = '#4deaff'; glowCol = 'rgba(46,230,255,0.28)'; }
+  } else {
+    col = isSource ? 'rgba(190,100,175,0.55)' : (isRecv ? 'rgba(95,185,150,0.5)' : 'rgba(120,160,215,0.55)');
+    glowCol = 'rgba(80,130,200,0.09)';
+  }
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(t.angle * Math.PI / 2);
+
+  var mask = t.baseMask & 15;
+  var paths = drawTilePath(cs, inset + cs*0.03, mask);
+  if(paths.length){
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.strokeStyle = glowCol;
+    ctx.lineWidth = Math.max(3, cs * 0.24);
+    for(var p=0;p<paths.length;p++){
+      ctx.beginPath();
+      ctx.moveTo(paths[p][0][0], paths[p][0][1]);
+      ctx.lineTo(paths[p][1][0], paths[p][1][1]);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = col;
+    ctx.lineWidth = Math.max(2, cs * 0.095);
+    for(var p2=0;p2<paths.length;p2++){
+      ctx.beginPath();
+      ctx.moveTo(paths[p2][0][0], paths[p2][0][1]);
+      ctx.lineTo(paths[p2][1][0], paths[p2][1][1]);
+      ctx.stroke();
+    }
+
+    if(energized && !reduced){
+      var dashLen = cs * 0.10;
+      var gapLen = cs * 0.24;
+      ctx.setLineDash([dashLen, gapLen]);
+      ctx.lineDashOffset = -((now * 0.00028 * cs) % (dashLen + gapLen));
+      ctx.strokeStyle = 'rgba(230,255,255,0.9)';
+      ctx.lineWidth = Math.max(1.2, cs * 0.04);
+      for(var p3=0;p3<paths.length;p3++){
+        ctx.beginPath();
+        ctx.moveTo(paths[p3][0][0], paths[p3][0][1]);
+        ctx.lineTo(paths[p3][1][0], paths[p3][1][1]);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+  }
+
+  if(t.type === 'oneway'){
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+    ctx.strokeStyle = energized ? '#ffffff' : 'rgba(160,195,235,0.75)';
+    ctx.lineWidth = Math.max(1.4, cs * 0.045);
+    ctx.lineCap = 'round';
+    var asz = cs * 0.11;
+    ctx.beginPath();
+    ctx.moveTo(-asz*0.55, -asz*0.85);
+    ctx.lineTo(0, -asz*0.15);
+    ctx.lineTo(asz*0.55, -asz*0.85);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if(isSource){
+    var pulse = 0.5 + 0.5 * Math.sin(now * 0.005);
+    ctx.beginPath();
+    ctx.arc(0, 0, cs * (0.115 + pulse * 0.02), 0, Math.PI*2);
+    ctx.fillStyle = energized ? '#ffb0ee' : '#c07bb0';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, cs * (0.20 + pulse * 0.05), 0, Math.PI*2);
+    ctx.strokeStyle = energized ? 'rgba(255,120,225,' + (0.35 + pulse*0.35) + ')' : 'rgba(160,110,170,0.3)';
+    ctx.lineWidth = Math.max(1, cs*0.028);
+    ctx.stroke();
+  }
+
+  if(isRecv){
+    ctx.beginPath();
+    ctx.arc(0, 0, cs * 0.16, 0, Math.PI*2);
+    ctx.strokeStyle = energized ? '#5cffae' : 'rgba(110,180,155,0.6)';
+    ctx.lineWidth = Math.max(1.6, cs * 0.05);
+    ctx.stroke();
+    if(energized){
+      ctx.beginPath();
+      ctx.arc(0, 0, cs * 0.065, 0, Math.PI*2);
+      ctx.fillStyle = '#d8ffee';
+      ctx.fill();
+    }
+  }
+
+  if(isPortal){
+    ctx.beginPath();
+    ctx.arc(0, 0, cs * 0.17, 0, Math.PI*2);
+    ctx.strokeStyle = energized ? '#d9a6ff' : 'rgba(150,120,200,0.6)';
+    ctx.lineWidth = Math.max(1.4, cs*0.04);
+    ctx.stroke();
+    var rot = (now * 0.0016) % (Math.PI*2);
+    ctx.save();
+    ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.arc(0, 0, cs * 0.115, 0, Math.PI * 1.15);
+    ctx.strokeStyle = energized ? '#f0d8ff' : 'rgba(150,120,200,0.45)';
+    ctx.lineWidth = Math.max(1.2, cs*0.032);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.restore();
+
+  if(t.locked){
+    ctx.save();
+    var lx = px + cs * 0.76, ly = py + cs * 0.26;
+    ctx.strokeStyle = 'rgba(170,195,230,0.65)';
+    ctx.fillStyle = 'rgba(170,195,230,0.65)';
+    ctx.lineWidth = Math.max(1.2, cs * 0.026);
+    ctx.beginPath();
+    ctx.arc(lx, ly - cs*0.035, cs*0.045, Math.PI, 0);
+    ctx.stroke();
+    roundRect(ctx, lx - cs*0.062, ly - cs*0.035, cs*0.124, cs*0.095, cs*0.022);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+var rafId = 0;
+var gameActive = false;
+var lastFrame = 0;
+
+function frame(now){
+  rafId = 0;
+  if(!gameActive) return;
+  var dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
+  lastFrame = now;
+
+  updateParticles(dt);
+  updateTimer(now);
+  render(now);
+
+  rafId = requestAnimationFrame(frame);
+}
+function startLoop(){
+  if(rafId) return;
+  lastFrame = 0;
+  rafId = requestAnimationFrame(frame);
+}
+function stopLoop(){
+  if(rafId){ cancelAnimationFrame(rafId); rafId = 0; }
+}
+
+function updateTimer(now){
+  if(!Game.timerRunning || Game.paused || Game.solved || Game.failed) return;
+  var el2 = (now - Game.timerStart) / 1000 + Game.timerAccum;
+  if(Math.abs(el2 - Game.elapsed) > 0.2){
+    Game.elapsed = el2;
+    updateHUDTime();
+  }
+  if(Game.timeLimit > 0){
+    var rem = Game.timeLimit - Game.elapsed;
+    if(rem <= 0){
+      Game.remaining = 0;
+      failLevel('TIME OUT');
+    } else {
+      Game.remaining = rem;
+    }
+  }
+}
+function startTimer(){
+  if(Game.timerRunning) return;
+  Game.timerRunning = true;
+  Game.timerStart = performance.now();
+}
+function pauseTimer(){
+  if(!Game.timerRunning) return;
+  Game.timerAccum += (performance.now() - Game.timerStart) / 1000;
+  Game.timerRunning = false;
+}
+function resumeTimer(){
+  if(Game.solved || Game.failed) return;
+  Game.timerRunning = true;
+  Game.timerStart = performance.now();
+}
+function stopTimer(){
+  if(Game.timerRunning){
+    Game.timerAccum += (performance.now() - Game.timerStart) / 1000;
+    Game.timerRunning = false;
+  }
+  Game.elapsed = Game.timerAccum;
+}
+
+function updateHUDTime(){
+  var s;
+  if(Game.timeLimit > 0){
+    s = fmtTime(Math.max(0, Game.remaining));
+  } else {
+    s = fmtTime(Game.elapsed);
+  }
+  var e = document.getElementById('hud-time');
+  if(e) e.textContent = s;
+  var wrap = document.getElementById('stat-time-wrap');
+  if(wrap && Game.timeLimit > 0){
+    if(Game.remaining < 20) wrap.classList.add('warn');
+    else wrap.classList.remove('warn');
+  }
+}
+
+var currentScreen = 'menu';
+
+function showScreen(name){
+  var screens = $$('.screen');
+  for(var i=0;i<screens.length;i++){
+    screens[i].classList.toggle('active', screens[i].id === 's-' + name);
+  }
+  currentScreen = name;
+  gameActive = (name === 'game');
+  if(gameActive){
+    resizeCanvas();
+    startLoop();
+  } else {
+    stopLoop();
+    particles.length = 0;
+  }
+  if(name === 'levels'){ renderWorldTabs(); renderLevelGrid(currentWorld); }
+  if(name === 'ach'){ renderAchievements(); }
+  if(name === 'settings'){ renderSettings(); }
+}
+
+var currentWorld = 1;
+
+function onMenuAction(act){
+  Sound.init();
+  Sound.click();
+  if(act === 'play'){
+    var lv = clamp(Save.data.unlocked || 1, 1, 100);
+    if(Save.data.lastLevel) lv = clamp(Save.data.lastLevel, 1, Save.data.unlocked);
+    startLevel(lv, false);
+  } else if(act === 'levels'){
+    currentWorld = Math.min(5, Math.max(1, Math.ceil((Save.data.unlocked || 1) / 20)));
+    showScreen('levels');
+  } else if(act === 'daily'){
+    startDaily();
+  } else if(act === 'howto'){
+    showScreen('howto');
+  } else if(act === 'settings'){
+    showScreen('settings');
+  } else if(act === 'ach'){
+    showScreen('ach');
+  }
+}
+
+function renderWorldTabs(){
+  var wrap = document.getElementById('world-tabs');
+  wrap.textContent = '';
+  for(var w=1; w<=5; w++){
+    (function(world){
+      var firstLevel = (world-1)*20 + 1;
+      var unlocked = (Save.data.unlocked >= firstLevel) || world === 1;
+      var tab = el('button', 'wtab' + (world === currentWorld ? ' active' : '') + (unlocked ? '' : ' locked'));
+      tab.setAttribute('aria-label', 'World ' + world);
+      var n = el('div', 'wt-n', 'W' + world);
+      var nm = el('div', '', WORLD_NAMES[world-1].slice(0, 8));
+      tab.appendChild(n);
+      tab.appendChild(nm);
+      if(!unlocked) tab.disabled = true;
+      tab.addEventListener('click', function(){
+        if(!unlocked) return;
+        Sound.click();
+        currentWorld = world;
+        renderWorldTabs();
+        renderLevelGrid(world);
+      });
+      wrap.appendChild(tab);
+    })(w);
+  }
+}
+
+function renderLevelGrid(world){
+  var grid = document.getElementById('level-grid');
+  grid.textContent = '';
+  var start = (world-1)*20 + 1;
+  var end = start + 19;
+  for(var lv = start; lv <= end; lv++){
+    (function(level){
+      var unlocked = level <= Save.data.unlocked;
+      var rec = Save.data.levels[level];
+      var stars = rec ? rec.stars : 0;
+      var btn = el('button', 'lvl' + (stars > 0 ? ' done' : '') + (unlocked ? '' : ' locked'));
+      btn.setAttribute('aria-label', 'Level ' + level + (stars ? ', ' + stars + ' stars' : ''));
+      var n = el('div', 'n', String(level));
+      var st = el('div', 'st', stars > 0 ? ('\u2605'.repeat(stars)) : '');
+      btn.appendChild(n);
+      btn.appendChild(st);
+      if(!unlocked){
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', function(){
+          Sound.click();
+          startLevel(level, false);
+        });
+      }
+      grid.appendChild(btn);
+    })(lv);
+  }
+}
+
+function dailyKeyFor(date){
+  var y = date.getFullYear();
+  var m = date.getMonth() + 1;
+  var d = date.getDate();
+  return '' + y + (m<10?'0':'') + m + (d<10?'0':'') + d;
+}
+function dailyNumber(key){
+  var y = parseInt(key.slice(0,4), 10);
+  var m = parseInt(key.slice(4,6), 10) - 1;
+  var d = parseInt(key.slice(6,8), 10);
+  var ms = Date.UTC(y, m, d) - Date.UTC(2024, 0, 1);
+  return Math.floor(ms / 86400000) + 1;
+}
+function dailyLevelNum(key){
+  var n = dailyNumber(key);
+  return 44 + ((n * 7) % 44);
+}
+
+function startLevel(level, isDaily, dailyKey){
+  Sound.init();
+  var seed, specLevel;
+  if(isDaily){
+    dailyKey = dailyKey || dailyKeyFor(new Date());
+    seed = hashStr('NGDAILY::' + dailyKey);
+    specLevel = dailyLevelNum(dailyKey);
+  } else {
+    seed = hashStr('NGLVL::' + level + '::v1');
+    specLevel = level;
+  }
+
+  var puz;
+  try{
+    puz = generatePuzzle(specLevel, seed);
+  }catch(e){
+    puz = null;
+  }
+  if(!puz || !puz.recvIdx.length){
+    puz = generatePuzzle(4, hashStr('FALLBACK::' + level + '::' + Math.random()));
+  }
+
+  Game.N = puz.N;
+  Game.tiles = puz.tiles;
+  Game.srcIdx = puz.srcIdx;
+  Game.recvIdx = puz.recvIdx;
+  Game.portalPartner = puz.portalPartner;
+  Game.rotatable = puz.rotatable;
+  Game.par = Math.max(1, puz.par);
+  Game.validRsFn = puz.validRs;
+  Game.spec = puz.spec;
+  Game.level = level;
+  Game.isDaily = !!isDaily;
+  Game.dailyKey = isDaily ? dailyKey : '';
+  Game.moves = 0;
+  Game.hints = 0;
+  Game.elapsed = 0;
+  Game.timerAccum = 0;
+  Game.timerRunning = false;
+  Game.solved = false;
+  Game.paused = false;
+  Game.failed = false;
+  Game.history = [];
+  Game.hintTile = -1;
+  Game.hintUntil = 0;
+
+  if(!isDaily){
+    Game.moveLimit = puz.spec.moveLimit ? Math.max(Game.par * 3 + 8, Math.round(Game.par * 3.5)) : 0;
+    Game.timeLimit = puz.spec.timed ? Math.max(60, Math.round(30 + Game.par * 14)) : 0;
+  } else {
+    Game.moveLimit = 0;
+    Game.timeLimit = 0;
+  }
+  Game.remaining = Game.timeLimit;
+
+  Save.data.stats.plays++;
+  Save.data.lastLevel = isDaily ? Save.data.lastLevel : level;
+  Save.save();
+
+  updateHUDFull();
+  computeEnergized();
+  computeGeom();
+
+  showScreen('game');
+  resizeCanvas();
+  requestAnimationFrame(function(){ resizeCanvas(); render(performance.now()); });
+}
+
+function startDaily(){
+  var key = dailyKeyFor(new Date());
+  startLevel(dailyLevelNum(key), true, key);
+}
+
+function updateHUDFull(){
+  var lvlEl = document.getElementById('hud-level');
+  var wEl = document.getElementById('hud-world');
+  if(Game.isDaily){
+    var num = dailyNumber(Game.dailyKey);
+    lvlEl.textContent = 'DAILY PUZZLE #' + num;
+    wEl.textContent = 'DAILY CHALLENGE';
+  } else {
+    var world = Math.min(5, Math.floor((Game.level-1)/20) + 1);
+    lvlEl.textContent = 'LEVEL ' + Game.level;
+    wEl.textContent = 'WORLD ' + world + ' \u00B7 ' + WORLD_NAMES[world-1];
+  }
+  document.getElementById('hud-moves').textContent = String(Game.moves);
+  var target = Math.max(Game.par + 2, Math.ceil(Game.par * 1.35));
+  var parLine = document.getElementById('par-line');
+  if(Game.moveLimit > 0){
+    parLine.innerHTML = 'MOVE LIMIT: <b>' + Game.moveLimit + '</b> &nbsp;\u00B7&nbsp; 3\u2605 AT \u2264 <b>' + target + '</b> MOVES';
+  } else {
+    parLine.innerHTML = '3\u2605 TARGET: <b>' + target + '</b> MOVES';
+  }
+  updateHUDTime();
+}
+
+function setTileRotation(t, newR){
+  if(t.r === newR) return;
+  t.animFrom = t.angle;
+  t.r = newR;
+  var base = Math.round(t.angle);
+  var guard = 0;
+  while((((base % 4) + 4) % 4) !== newR && guard++ < 8) base++;
+  if(base < t.angle) base += 4;
+  t.animTo = base;
+  t.animStart = performance.now();
+}
+
+function pushHistory(){
+  var snap = new Uint8Array(Game.tiles.length);
+  for(var i=0;i<Game.tiles.length;i++){
+    snap[i] = Game.tiles[i] ? Game.tiles[i].r : 0;
+  }
+  Game.history.push({ r: snap, moves: Game.moves });
+  if(Game.history.length > 250) Game.history.shift();
+}
+
+function handleTap(idx){
+  if(Game.solved || Game.paused || Game.failed) return;
+  var t = Game.tiles[idx];
+  if(!t) { Sound.error(); vibrate(20); return; }
+  if(t.locked){
+    Sound.error();
+    vibrate([12, 40, 12]);
+    toast('This tile is locked');
+    return;
+  }
+  if(t.type === 'block'){ Sound.error(); return; }
+
+  startTimer();
+  pushHistory();
+  setTileRotation(t, (t.r + 1) & 3);
+  Game.moves++;
+  document.getElementById('hud-moves').textContent = String(Game.moves);
+  Sound.rotate();
+  vibrate(10);
+
+  computeEnergized();
+
+  if(Game.moveLimit > 0 && Game.moves > Game.moveLimit && !isSolved()){
+    failLevel('OUT OF MOVES');
+    return;
+  }
+  if(isSolved()) completeLevel();
+}
+
+function doUndo(){
+  if(Game.solved || Game.paused || Game.failed) return;
+  if(!Game.history.length){ Sound.error(); toast('Nothing to undo'); return; }
+  var snap = Game.history.pop();
+  for(var i=0;i<Game.tiles.length;i++){
+    var t = Game.tiles[i];
+    if(!t || t.locked) continue;
+    if(t.r !== snap.r[i]) setTileRotation(t, snap.r[i]);
+  }
+  Game.moves = snap.moves;
+  document.getElementById('hud-moves').textContent = String(Game.moves);
+  Save.data.stats.undosUsed++;
+  Save.save();
+  computeEnergized();
+  Sound.click();
+  vibrate(8);
+}
+
+function doReset(){
+  if(Game.solved || Game.failed) return;
+  if(!Game.history.length){ toast('Already at start'); return; }
+  var first = Game.history[0];
+  Game.history.length = 0;
+  for(var i=0;i<Game.tiles.length;i++){
+    var t = Game.tiles[i];
+    if(!t || t.locked) continue;
+    if(t.r !== first.r[i]) setTileRotation(t, first.r[i]);
+  }
+  Game.moves = 0;
+  document.getElementById('hud-moves').textContent = '0';
+  computeEnergized();
+  Sound.click();
+  vibrate(15);
+  toast('Level reset');
+}
+
+function doHint(){
+  if(Game.solved || Game.paused || Game.failed) return;
+  if(!Game.validRsFn){ return; }
+  var candidates = [];
+  for(var i=0;i<Game.rotatable.length;i++){
+    var idx = Game.rotatable[i];
+    var t = Game.tiles[idx];
+    if(!t) continue;
+    var vs = Game.validRsFn(t);
+    var ok = false;
+    for(var v=0; v<vs.length; v++){
+      if(vs[v] === t.r){ ok = true; break; }
+    }
+    if(!ok) candidates.push(idx);
+  }
+  if(!candidates.length){
+    toast('Circuit is already correct \u2014 check the receivers');
+    return;
+  }
+  startTimer();
+  var pick = candidates[(Math.random() * candidates.length) | 0];
+  Game.hintTile = pick;
+  Game.hintUntil = performance.now() + 4200;
+  Game.hints++;
+  Save.data.stats.hintsUsed++;
+  Save.save();
+  Sound.hint();
+  vibrate([10, 30, 10]);
+  toast('Hint: rotate the highlighted tile');
+}
+
+function calcStars(moves, par, timeSec, hints){
+  var t3moves = Math.max(par + 2, Math.ceil(par * 1.35));
+  var t3time = 25 + par * 13;
+  if(moves <= t3moves && hints === 0 && timeSec <= t3time) return 3;
+
+  var t2moves = par * 2 + 5;
+  var t2time = 70 + par * 30;
+  if(moves <= t2moves && timeSec <= t2time) return 2;
+  return 1;
+}
+
+function completeLevel(){
+  if(Game.solved) return;
+  Game.solved = true;
+  stopTimer();
+
+  var time = Game.elapsed;
+  var moves = Game.moves;
+  var stars = calcStars(moves, Game.par, time, Game.hints);
+
+  if(!Save.data.settings.reduced){
+    var bs = boardGeom.bs, cs = boardGeom.cs, ox = boardGeom.ox, oy = boardGeom.oy;
+    for(var i=0;i<Game.recvIdx.length;i++){
+      var idx = Game.recvIdx[i];
+      var x = ox + (idx % Game.N) * cs + cs/2;
+      var y = oy + (((idx / Game.N) | 0)) * cs + cs/2;
+      spawnParticles(x, y, 14, '#5cffae', 90, 0.9);
+    }
+    var sx = ox + (Game.srcIdx[0] % Game.N) * cs + cs/2;
+    var sy = oy + (((Game.srcIdx[0] / Game.N) | 0)) * cs + cs/2;
+    spawnParticles(sx, sy, 18, '#ff6ade', 110, 1.0);
+  }
+
+  Sound.complete();
+  vibrate([25, 50, 25, 50, 60]);
+
+  if(Game.isDaily){
+    var rec = Save.data.daily[Game.dailyKey] || { done:false, time:0, moves:0 };
+    var firstDone = !rec.done;
+    if(!rec.done || time < rec.time || rec.time === 0){
+      rec.time = rec.time === 0 ? time : Math.min(rec.time, time);
+    }
+    if(!rec.done || moves < rec.moves || rec.moves === 0){
+      rec.moves = rec.moves === 0 ? moves : Math.min(rec.moves, moves);
+    }
+    rec.done = true;
+    Save.data.daily[Game.dailyKey] = rec;
+    if(firstDone){
+      Save.data.stats.dailies++;
+      Sound.daily();
+      if(!Save.data.settings.reduced){
+        spawnParticles(CW/2, CH/2, 40, '#c88bff', 180, 1.4);
+      }
+    }
+    Save.data.stats.levelsDone++;
+    Save.data.stats.totalMoves += moves;
+    Save.data.stats.totalTime += time;
+    Save.save();
+    checkAchievements();
+    showCompleteModal(stars, time, moves, true);
+    return;
+  }
+
+  var prev = Save.data.levels[Game.level];
+  var newBestTime = !prev || prev.time === 0 || time < prev.time;
+  var newBestMoves = !prev || prev.moves === 0 || moves < prev.moves;
+  var bestStars = Math.max(stars, prev ? prev.stars : 0);
+  Save.data.levels[Game.level] = {
+    stars: bestStars,
+    time: prev && prev.time > 0 ? Math.min(prev.time, time) : time,
+    moves: prev && prev.moves > 0 ? Math.min(prev.moves, moves) : moves
+  };
+
+  Save.data.stats.levelsDone++;
+  Save.data.stats.totalMoves += moves;
+  Save.data.stats.totalTime += time;
+  if(Game.hints === 0) Save.data.stats.noHintCompletions++;
+
+  if(stars === 3){
+    Save.data.stats.threeStarStreak++;
+    if(Save.data.stats.threeStarStreak > Save.data.stats.bestThreeStarStreak){
+      Save.data.stats.bestThreeStarStreak = Save.data.stats.threeStarStreak;
+    }
+  } else {
+    Save.data.stats.threeStarStreak = 0;
+  }
+
+  if(Game.level >= Save.data.unlocked && Game.level < 100){
+    Save.data.unlocked = Game.level + 1;
+  }
+  Save.save();
+
+  checkAchievements();
+  showCompleteModal(stars, time, moves, false, newBestTime, newBestMoves);
+}
+
+function failLevel(reason){
+  if(Game.failed || Game.solved) return;
+  Game.failed = true;
+  stopTimer();
+  Sound.error();
+  vibrate([60, 60, 120]);
+  showModal(function(root){
+    root.appendChild(el('h2', null, 'FAILED'));
+    root.appendChild(el('div', 'sub', reason));
+    var p = el('p', null, 'The circuit was not completed in time. Try again!');
+    p.style.textAlign = 'center';
+    p.style.color = '#b9cdea';
+    p.style.fontSize = '14px';
+    p.style.lineHeight = '1.6';
+    root.appendChild(p);
+    var btns = el('div', 'modal-btns');
+    var b1 = el('button', 'btn primary', 'RETRY');
+    b1.addEventListener('click', function(){ closeModal(); startLevel(Game.level, false); });
+    var b2 = el('button', 'btn ghost', 'MENU');
+    b2.addEventListener('click', function(){ closeModal(); showScreen('menu'); });
+    btns.appendChild(b1);
+    btns.appendChild(b2);
+    root.appendChild(btns);
+  });
+}
+
+var modalBack = document.getElementById('modal-back');
+var modalEl = document.getElementById('modal');
+
+function showModal(builder){
+  modalEl.textContent = '';
+  builder(modalEl);
+  modalBack.classList.add('show');
+}
+function closeModal(){
+  modalBack.classList.remove('show');
+  modalEl.textContent = '';
+}
+
+function showCompleteModal(stars, time, moves, isDaily, newBestTime, newBestMoves){
+  showModal(function(root){
+    var title = isDaily ? 'DAILY COMPLETE' : 'LEVEL COMPLETE';
+    root.appendChild(el('h2', null, title));
+    root.appendChild(el('div', 'sub', isDaily ? ('PUZZLE #' + dailyNumber(Game.dailyKey)) : ('LEVEL ' + Game.level)));
+
+    var starsRow = el('div', 'stars-row');
+    for(var i=0;i<3;i++){
+      var s = el('div', 'star' + (i < stars ? ' on' : ''), i < stars ? '\u2605' : '\u2606');
+      starsRow.appendChild(s);
+      if(i < stars){
+        (function(node, delay){
+          setTimeout(function(){
+            node.classList.add('pop');
+            Sound.star();
+          }, delay);
+        })(s, 260 + i * 190);
+      }
+    }
+    root.appendChild(starsRow);
+
+    var grid = el('div', 'result-grid');
+    var c1 = el('div', 'result-cell');
+    c1.appendChild(el('b', null, fmtTime(time)));
+    c1.appendChild(el('small', null, 'TIME'));
+    var c2 = el('div', 'result-cell');
+    c2.appendChild(el('b', null, String(moves)));
+    c2.appendChild(el('small', null, 'MOVES'));
+    var c3 = el('div', 'result-cell');
+    c3.appendChild(el('b', null, String(Game.par)));
+    c3.appendChild(el('small', null, 'PAR'));
+    var c4 = el('div', 'result-cell');
+    c4.appendChild(el('b', null, String(Game.hints)));
+    c4.appendChild(el('small', null, 'HINTS'));
+    grid.appendChild(c1); grid.appendChild(c2); grid.appendChild(c3); grid.appendChild(c4);
+    root.appendChild(grid);
+
+    if(newBestTime || newBestMoves){
+      var nb = el('div', null, (newBestTime && newBestMoves) ? 'NEW BEST TIME & MOVES!' : (newBestTime ? 'NEW BEST TIME!' : 'NEW BEST MOVES!'));
+      nb.style.textAlign = 'center';
+      nb.style.marginTop = '12px';
+      nb.style.fontSize = '11px';
+      nb.style.letterSpacing = '2.5px';
+      nb.style.color = '#ffc247';
+      root.appendChild(nb);
+    }
+
+    var btns = el('div', 'modal-btns');
+
+    if(!isDaily){
+      var shareBtn = el('button', 'btn ghost', 'SHARE RESULT');
+      shareBtn.addEventListener('click', function(){
+        var txt = '\u26A1 I solved NEON GRID Level ' + Game.level + ' with ' + stars + ' star' + (stars===1?'':'s') +
+                  ' in ' + fmtTime(time) + ' and ' + moves + ' moves. Can you beat me?';
+        doShare(txt);
+      });
+      btns.appendChild(shareBtn);
+
+      var row = el('div', 'r');
+      var replay = el('button', 'btn ghost', 'REPLAY');
+      replay.style.flex = '1';
+      replay.addEventListener('click', function(){
+        closeModal();
+        startLevel(Game.level, false);
+      });
+      var next = el('button', 'btn primary', 'NEXT');
+      next.style.flex = '1';
+      if(Game.level < 100){
+        next.addEventListener('click', function(){
+          closeModal();
+          startLevel(Game.level + 1, false);
+        });
+      } else {
+        next.disabled = true;
+        next.textContent = 'DONE';
+      }
+      row.appendChild(replay);
+      row.appendChild(next);
+      btns.appendChild(row);
+
+      var menu = el('button', 'btn ghost', 'LEVEL SELECT');
+      menu.addEventListener('click', function(){
+        closeModal();
+        currentWorld = Math.min(5, Math.floor((Game.level-1)/20)+1);
+        showScreen('levels');
+      });
+      btns.appendChild(menu);
+    } else {
+      var shareBtn2 = el('button', 'btn ghost', 'SHARE RESULT');
+      shareBtn2.addEventListener('click', function(){
+        var txt = '\u26A1 I solved NEON GRID Daily Puzzle #' + dailyNumber(Game.dailyKey) +
+                  ' in ' + fmtTime(time) + ' with ' + moves + ' moves!';
+        doShare(txt);
+      });
+      btns.appendChild(shareBtn2);
+      var menu2 = el('button', 'btn primary', 'MENU');
+      menu2.addEventListener('click', function(){
+        closeModal();
+        showScreen('menu');
+      });
+      btns.appendChild(menu2);
+    }
+
+    root.appendChild(btns);
+  });
+}
+
+function doShare(text){
+  if(navigator.share){
+    try{
+      navigator.share({ text: text }).catch(function(){});
+      return;
+    }catch(e){}
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      toast('Copied to clipboard');
+    }).catch(function(){
+      toast('Share not available');
+    });
+  } else {
+    toast('Share not available');
+  }
+}
+
+function toast(msg){
+  var wrap = document.getElementById('toast-wrap');
+  if(wrap.children.length >= 3) return;
+  var t = el('div', 'toast', msg);
+  wrap.appendChild(t);
+  setTimeout(function(){
+    t.classList.add('out');
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 320);
+  }, 1900);
+}
+
+var ACHIEVEMENTS = [
+  { id:'first_connection', icon:'\u26A1', name:'First Connection', desc:'Complete your first level.', test:function(s){ return s.stats.levelsDone >= 1; } },
+  { id:'first_perfect', icon:'\u2605', name:'First Perfect', desc:'Earn 3 stars on any level.', test:function(){ return hasAnyThreeStar(); } },
+  { id:'perfect_10', icon:'\u2726', name:'Perfectionist', desc:'Earn 3 stars on 10 different levels.', test:function(){ return countStars(3) >= 10; } },
+  { id:'speed_runner', icon:'\u23F1', name:'Speed Runner', desc:'Finish a level in under 15 seconds.', test:function(s){ return s._fastest && s._fastest < 15; } },
+  { id:'puzzle_master', icon:'\u25C6', name:'Puzzle Master', desc:'Complete 50 levels.', test:function(s){ return s.stats.levelsDone >= 50; } },
+  { id:'century', icon:'\u25CF', name:'Century Circuit', desc:'Complete 100 levels.', test:function(s){ return s.stats.levelsDone >= 100; } },
+  { id:'no_hint_25', icon:'\u2699', name:'Self Reliant', desc:'Complete 25 levels without using a hint.', test:function(s){ return s.stats.noHintCompletions >= 25; } },
+  { id:'daily_player', icon:'\u2609', name:'Daily Player', desc:'Complete a Daily Puzzle.', test:function(s){ return s.stats.dailies >= 1; } },
+  { id:'daily_7', icon:'\u2733', name:'Weekly Routine', desc:'Complete 7 Daily Puzzles.', test:function(s){ return s.stats.dailies >= 7; } },
+  { id:'world1', icon:'\u2776', name:'World 1 Clear', desc:'Clear all of World 1.', test:function(){ return worldCleared(1); } },
+  { id:'world2', icon:'\u2777', name:'World 2 Clear', desc:'Clear all of World 2.', test:function(){ return worldCleared(2); } },
+  { id:'world3', icon:'\u2778', name:'World 3 Clear', desc:'Clear all of World 3.', test:function(){ return worldCleared(3); } },
+  { id:'world4', icon:'\u2779', name:'World 4 Clear', desc:'Clear all of World 4.', test:function(){ return worldCleared(4); } },
+  { id:'world5', icon:'\u277A', name:'World 5 Clear', desc:'Clear all of World 5.', test:function(){ return worldCleared(5); } },
+  { id:'circuit_expert', icon:'\u269B', name:'Circuit Expert', desc:'Complete a 6x6 or larger level without hints.', test:function(s){ return !!s._bigNoHint; } },
+  { id:'persistent', icon:'\u21BA', name:'Persistent', desc:'Use undo 20 times.', test:function(s){ return s.stats.undosUsed >= 20; } },
+  { id:'minimalist', icon:'\u25AB', name:'Minimalist', desc:'Finish a level in exactly par moves.', test:function(s){ return !!s._exactPar; } },
+  { id:'streak5', icon:'\u2728', name:'Hot Streak', desc:'Earn 3 stars on 5 levels in a row.', test:function(s){ return s.stats.bestThreeStarStreak >= 5; } },
+  { id:'collector', icon:'\u2B50', name:'Star Collector', desc:'Collect 150 stars total.', test:function(){ return Save.totalStars() >= 150; } },
+  { id:'veteran', icon:'\u2694', name:'Veteran', desc:'Play 60 levels.', test:function(s){ return s.stats.plays >= 60; } }
+];
+
+function countStars(n){
+  var c = 0;
+  for(var k in Save.data.levels){
+    if(Object.prototype.hasOwnProperty.call(Save.data.levels, k)){
+      if(Save.data.levels[k].stars >= n) c++;
+    }
+  }
+  return c;
+}
+function hasAnyThreeStar(){ return countStars(3) > 0; }
+function worldCleared(w){
+  var start = (w-1)*20 + 1, end = start + 19;
+  for(var i=start; i<=end; i++){
+    if(!Save.data.levels[i] || Save.data.levels[i].stars < 1) return false;
+  }
+  return true;
+}
+
+function checkAchievements(){
+  var stats = Save.data.stats;
+  var newly = [];
+  for(var i=0;i<ACHIEVEMENTS.length;i++){
+    var a = ACHIEVEMENTS[i];
+    if(Save.data.achievements[a.id]) continue;
+    var ok = false;
+    try{ ok = !!a.test(Save.data); }catch(e){ ok = false; }
+    if(ok){
+      Save.data.achievements[a.id] = true;
+      newly.push(a);
+    }
+  }
+  if(newly.length){
+    Save.save();
+    for(var j=0;j<newly.length;j++){
+      (function(a, delay){
+        setTimeout(function(){
+          toast('Achievement: ' + a.name);
+          Sound.star();
+        }, delay);
+      })(newly[j], 600 + j * 700);
+    }
+  }
+}
+
+function renderAchievements(){
+  var list = document.getElementById('ach-list');
+  list.textContent = '';
+  var unlocked = 0;
+  for(var i=0;i<ACHIEVEMENTS.length;i++){
+    var a = ACHIEVEMENTS[i];
+    var on = !!Save.data.achievements[a.id];
+    if(on) unlocked++;
+    var row = el('div', 'ach' + (on ? ' on' : ''));
+    var ic = el('div', 'ic', a.icon);
+    var tx = el('div');
+    tx.style.flex = '1';
+    tx.appendChild(el('div', 't', a.name));
+    tx.appendChild(el('div', 'd', a.desc));
+    row.appendChild(ic);
+    row.appendChild(tx);
+    list.appendChild(row);
+  }
+  document.getElementById('ach-count').textContent = unlocked + ' / ' + ACHIEVEMENTS.length;
+}
+
+function renderSettings(){
+  var s = Save.data.settings;
+  document.getElementById('sw-sound').classList.toggle('on', !!s.sound);
+  document.getElementById('sw-vib').classList.toggle('on', !!s.vibration);
+  document.getElementById('sw-reduced').classList.toggle('on', !!s.reduced);
+
+  var st = Save.data.stats;
+  var totalStars = Save.totalStars();
+  var lines = [
+    'Levels played: ' + st.plays,
+    'Levels completed: ' + st.levelsDone,
+    'Total stars: ' + totalStars,
+    'Total moves: ' + st.totalMoves,
+    'Hints used: ' + st.hintsUsed,
+    'Daily puzzles: ' + st.dailies
+  ];
+  document.getElementById('stats-text').textContent = lines.join('\n');
+  document.getElementById('stats-text').style.whiteSpace = 'pre-line';
+}
+
+function toggleSetting(key, swEl){
+  Save.data.settings[key] = !Save.data.settings[key];
+  swEl.classList.toggle('on', Save.data.settings[key]);
+  Save.save();
+  Sound.click();
+  if(key === 'reduced'){
+    document.body.classList.toggle('reduced', Save.data.settings.reduced);
+  }
+}
+
+document.addEventListener('keydown', function(e){
+  if(currentScreen !== 'game') return;
+  var k = e.key.toLowerCase();
+  if(k === 'z' || k === 'u'){ e.preventDefault(); doUndo(); }
+  else if(k === 'r'){ e.preventDefault(); doReset(); }
+  else if(k === 'h'){ e.preventDefault(); doHint(); }
+  else if(k === 'escape'){ e.preventDefault(); togglePause(); }
+});
+
+function togglePause(){
+  if(Game.solved || Game.failed) return;
+  if(Game.paused) resumeGame();
+  else pauseGame();
+}
+function pauseGame(){
+  if(Game.paused || Game.solved || Game.failed) return;
+  Game.paused = true;
+  pauseTimer();
+  Sound.click();
+  showModal(function(root){
+    root.appendChild(el('h2', null, 'PAUSED'));
+    root.appendChild(el('div', 'sub', Game.isDaily ? ('DAILY #' + dailyNumber(Game.dailyKey)) : ('LEVEL ' + Game.level)));
+    var grid = el('div', 'result-grid');
+    var c1 = el('div', 'result-cell');
+    c1.appendChild(el('b', null, String(Game.moves)));
+    c1.appendChild(el('small', null, 'MOVES'));
+    var c2 = el('div', 'result-cell');
+    c2.appendChild(el('b', null, fmtTime(Game.elapsed)));
+    c2.appendChild(el('small', null, 'TIME'));
+    grid.appendChild(c1); grid.appendChild(c2);
+    root.appendChild(grid);
+
+    var btns = el('div', 'modal-btns');
+    var b1 = el('button', 'btn primary', 'RESUME');
+    b1.addEventListener('click', function(){ closeModal(); resumeGame(); });
+    var b2 = el('button', 'btn ghost', 'RESTART');
+    b2.addEventListener('click', function(){
+      closeModal();
+      Game.paused = false;
+      if(Game.isDaily) startLevel(Game.level, true, Game.dailyKey);
+      else startLevel(Game.level, false);
+    });
+    var b3 = el('button', 'btn ghost', 'QUIT');
+    b3.addEventListener('click', function(){
+      closeModal();
+      Game.paused = false;
+      showScreen('menu');
+    });
+    btns.appendChild(b1);
+    btns.appendChild(b2);
+    btns.appendChild(b3);
+    root.appendChild(btns);
+  });
+}
+function resumeGame(){
+  Game.paused = false;
+  closeModal();
+  resumeTimer();
+}
+
+function initEvents(){
+  $$('[data-act]').forEach(function(b){
+    b.addEventListener('click', function(){ onMenuAction(b.getAttribute('data-act')); });
+  });
+  $$('[data-back]').forEach(function(b){
+    b.addEventListener('click', function(){
+      Sound.click();
+      showScreen(b.getAttribute('data-back'));
+    });
+  });
+
+  document.getElementById('btn-pause').addEventListener('click', togglePause);
+  document.getElementById('btn-undo').addEventListener('click', doUndo);
+  document.getElementById('btn-hint').addEventListener('click', doHint);
+  document.getElementById('btn-reset').addEventListener('click', doReset);
+
+  var swSound = document.getElementById('sw-sound');
+  var swVib = document.getElementById('sw-vib');
+  var swRed = document.getElementById('sw-reduced');
+  function bindSwitch(elm, key){
+    function handler(){
+      toggleSetting(key, elm);
+      if(key === 'sound' && Save.data.settings.sound){
+        Sound.init();
+        Sound.click();
+      }
+    }
+    elm.addEventListener('click', handler);
+    elm.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handler(); }
+    });
+  }
+  bindSwitch(swSound, 'sound');
+  bindSwitch(swVib, 'vibration');
+  bindSwitch(swRed, 'reduced');
+
+  document.getElementById('btn-reset-progress').addEventListener('click', function(){
+    showModal(function(root){
+      root.appendChild(el('h2', null, 'RESET?'));
+      var p = el('p', null, 'This permanently deletes all progress, stars, achievements and daily records. This cannot be undone.');
+      p.style.textAlign = 'center';
+      p.style.color = '#b9cdea';
+      p.style.fontSize = '14px';
+      p.style.lineHeight = '1.6';
+      root.appendChild(p);
+      var btns = el('div', 'modal-btns');
+      var yes = el('button', 'btn primary', 'YES, RESET');
+      yes.addEventListener('click', function(){
+        try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+        Save.data = Save.defaults();
+        Save.save();
+        closeModal();
+        document.body.classList.remove('reduced');
+        toast('Progress reset');
+        showScreen('menu');
+      });
+      var no = el('button', 'btn ghost', 'CANCEL');
+      no.addEventListener('click', closeModal);
+      btns.appendChild(yes);
+      btns.appendChild(no);
+      root.appendChild(btns);
+    });
+  });
+
+  cvs.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    if(!Game.N) return;
+    var rect = cvs.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var y = e.clientY - rect.top;
+    var N = Game.N;
+    var cs = boardGeom.cs;
+    var gx = Math.floor((x - boardGeom.ox) / cs);
+    var gy = Math.floor((y - boardGeom.oy) / cs);
+    if(gx < 0 || gy < 0 || gx >= N || gy >= N) return;
+    handleTap(gy * N + gx);
+  }, { passive: false });
+
+  cvs.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  modalBack.addEventListener('click', function(e){
+    if(e.target === modalBack){
+      if(Game.paused && currentScreen === 'game') resumeGame();
+    }
+  });
+
+  var resizeTimer = 0;
+  function handleResize(){
+    if(resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      resizeTimer = 0;
+      resizeCanvas();
+      if(gameActive) render(performance.now());
+    }, 80);
+  }
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', function(){
+    setTimeout(handleResize, 220);
+  });
+  if(window.ResizeObserver){
+    try{
+      var ro = new ResizeObserver(function(){ handleResize(); });
+      ro.observe(document.getElementById('board-wrap'));
+    }catch(e){}
+  }
+
+  function unlockAudio(){
+    Sound.init();
+    Sound.resume();
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+  }
+  window.addEventListener('pointerdown', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && currentScreen === 'game' && !Game.solved && !Game.failed && !Game.paused){
+      pauseGame();
+    }
+  });
+
+  var lastTouch = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if(now - lastTouch < 320){ e.preventDefault(); }
+    lastTouch = now;
+  }, { passive: false });
+}
+
+function boot(){
+  document.body.classList.toggle('reduced', Save.data.settings.reduced);
+  initEvents();
+  showScreen('menu');
+
+  setTimeout(function(){
+    resizeCanvas();
+  }, 60);
+}
+
+boot();
+
+})();
+</script>
+</body>
+</html>
