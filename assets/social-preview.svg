@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg" cx="0.12" cy="0" r="1.2">
+      <stop offset="0" stop-color="#12305e"/>
+      <stop offset="0.55" stop-color="#080d1c"/>
+      <stop offset="1" stop-color="#05070f"/>
+    </radialGradient>
+    <linearGradient id="t1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaffff"/>
+      <stop offset="0.5" stop-color="#2ee6ff"/>
+      <stop offset="1" stop-color="#2f7fff"/>
+    </linearGradient>
+    <linearGradient id="t2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe8ff"/>
+      <stop offset="0.5" stop-color="#ff4fd8"/>
+      <stop offset="1" stop-color="#a02fff"/>
+    </linearGradient>
+    <linearGradient id="cy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2ee6ff"/>
+      <stop offset="1" stop-color="#2f7fff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0 H0 V56" fill="none" stroke="#3c8cdc" stroke-width="1" opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <g transform="translate(760 92)" filter="url(#glow)">
+    <rect x="0" y="0" width="372" height="372" rx="26"
+          fill="rgba(10,17,33,0.85)" stroke="rgba(70,150,220,0.35)" stroke-width="2"/>
+    <g stroke="url(#cy)" stroke-width="13" stroke-linecap="round" fill="none" opacity="0.95">
+      <path d="M38 96 H334"/>
+      <path d="M334 96 V186"/>
+      <path d="M334 186 H38"/>
+      <path d="M38 186 V276"/>
+      <path d="M38 276 H334"/>
+    </g>
+    <circle cx="38" cy="96" r="26" fill="#ff4fd8"/>
+    <circle cx="334" cy="276" r="22" fill="none" stroke="#3dff9e" stroke-width="11"/>
+  </g>
+
+  <text x="88" y="252" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-size="112" font-weight="900" letter-spacing="8" fill="url(#t1)">NEON</text>
+  <text x="88" y="368" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-size="112" font-weight="900" letter-spacing="8" fill="url(#t2)">GRID</text>
+
+  <text x="92" y="440" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-size="27" font-weight="600" letter-spacing="6" fill="#8ba3c8">
+    CONNECT THE CIRCUIT
+  </text>
+
+  <text x="92" y="512" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-size="21" font-weight="600" letter-spacing="3" fill="#2ee6ff">
+    100 LEVELS · DAILY PUZZLES · OFFLINE
+  </text>
+</svg>
