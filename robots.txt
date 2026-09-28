@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sakibsheikho69252-nitizen.github.io/neon-grid/sitemap.xml
