@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <radialGradient id="bg" cx="0.15" cy="0" r="1.2">
+      <stop offset="0" stop-color="#12305e"/>
+      <stop offset="0.55" stop-color="#070b16"/>
+      <stop offset="1" stop-color="#05070f"/>
+    </radialGradient>
+    <linearGradient id="cy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2ee6ff"/>
+      <stop offset="1" stop-color="#2f7fff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <text x="540" y="150" text-anchor="middle"
+        font-family="system-ui,sans-serif" font-size="38" font-weight="800"
+        letter-spacing="6" fill="#eafcff">LEVEL 1</text>
+  <text x="540" y="196" text-anchor="middle"
+        font-family="system-ui,sans-serif" font-size="22" font-weight="700"
+        letter-spacing="5" fill="#8ba3c8">WORLD 1 · BEGINNER</text>
+
+  <text x="120" y="300" font-family="system-ui,sans-serif" font-size="34"
+        font-weight="800" fill="#cfeaff">12</text>
+  <text x="120" y="330" font-family="system-ui,sans-serif" font-size="17"
+        letter-spacing="3" fill="#8ba3c8">MOVES</text>
+
+  <text x="960" y="300" text-anchor="end" font-family="system-ui,sans-serif"
+        font-size="34" font-weight="800" fill="#cfeaff">0:24</text>
+  <text x="960" y="330" text-anchor="end" font-family="system-ui,sans-serif"
+        font-size="17" letter-spacing="3" fill="#8ba3c8">TIME</text>
+
+  <rect x="78" y="688" width="924" height="924" rx="36"
+        fill="rgba(10,17,33,0.75)" stroke="rgba(70,150,220,0.3)" stroke-width="3"/>
+
+  <g fill="rgba(18,70,105,0.42)" stroke="rgba(46,230,255,0.4)" stroke-width="2.5">
+    <rect x="98" y="708" width="205" height="205" rx="28"/>
+    <rect x="318" y="708" width="205" height="205" rx="28"/>
+    <rect x="538" y="708" width="205" height="205" rx="28"/>
+    <rect x="758" y="708" width="205" height="205" rx="28"/>
+
+    <rect x="98" y="928" width="205" height="205" rx="28"/>
+    <rect x="318" y="928" width="205" height="205" rx="28"/>
+    <rect x="538" y="928" width="205" height="205" rx="28"/>
+    <rect x="758" y="928" width="205" height="205" rx="28"/>
+
+    <rect x="98" y="1148" width="205" height="205" rx="28"/>
+    <rect x="318" y="1148" width="205" height="205" rx="28"/>
+    <rect x="538" y="1148" width="205" height="205" rx="28"/>
+    <rect x="758" y="1148" width="205" height="205" rx="28"/>
+
+    <rect x="98" y="1368" width="205" height="205" rx="28"/>
+    <rect x="318" y="1368" width="205" height="205" rx="28"/>
+    <rect x="538" y="1368" width="205" height="205" rx="28"/>
+    <rect x="758" y="1368" width="205" height="205" rx="28"/>
+  </g>
+
+  <g filter="url(#glow)" stroke="url(#cy)" stroke-width="20"
+     stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M98 810 H860 V1030 H98 V1250 H860 V1470 H98"/>
+  </g>
+
+  <circle cx="98" cy="810" r="34" fill="#ff6ade" filter="url(#glow)"/>
+  <circle cx="98" cy="810" r="54" fill="none" stroke="#ff4fd8" stroke-width="8" opacity="0.55"/>
+
+  <circle cx="98" cy="1470" r="26" fill="none" stroke="#5cffae" stroke-width="13" filter="url(#glow)"/>
+  <circle cx="860" cy="810" r="22" fill="none" stroke="#5cffae" stroke-width="11" filter="url(#glow)"/>
+
+  <text x="540" y="1690" text-anchor="middle"
+        font-family="system-ui,sans-serif" font-size="21" font-weight="700"
+        letter-spacing="4" fill="#8ba3c8">3★ TARGET: <tspan fill="#ffc247">14</tspan> MOVES</text>
+
+  <g font-family="system-ui,sans-serif" font-size="26" font-weight="800"
+     letter-spacing="3" text-anchor="middle">
+    <rect x="98" y="1750" width="272" height="120" rx="28"
+          fill="rgba(38,56,92,0.85)" stroke="rgba(90,160,240,0.3)" stroke-width="2.5"/>
+    <text x="234" y="1824" fill="#dbe7ff">UNDO</text>
+
+    <rect x="404" y="1750" width="272" height="120" rx="28"
+          fill="rgba(38,56,92,0.85)" stroke="rgba(90,160,240,0.3)" stroke-width="2.5"/>
+    <text x="540" y="1824" fill="#dbe7ff">HINT</text>
+
+    <rect x="710" y="1750" width="272" height="120" rx="28"
+          fill="rgba(38,56,92,0.85)" stroke="rgba(90,160,240,0.3)" stroke-width="2.5"/>
+    <text x="846" y="1824" fill="#dbe7ff">RESET</text>
+  </g>
+</svg>
