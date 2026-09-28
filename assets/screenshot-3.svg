@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.35" r="1.1">
+      <stop offset="0" stop-color="#123a6e"/>
+      <stop offset="0.5" stop-color="#0a0f22"/>
+      <stop offset="1" stop-color="#05070f"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe9a8"/>
+      <stop offset="1" stop-color="#ffa41b"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="16" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <g opacity="0.22">
+    <rect x="78" y="688" width="924" height="924" rx="36"
+          fill="rgba(10,17,33,0.9)" stroke="rgba(70,150,220,0.35)" stroke-width="3"/>
+  </g>
+
+  <rect x="110" y="430" width="860" height="1060" rx="52"
+        fill="rgba(14,22,40,0.97)" stroke="rgba(90,160,240,0.42)" stroke-width="3"/>
+
+  <text x="540" y="560" text-anchor="middle" font-family="system-ui,sans-serif"
+        font-size="54" font-weight="900" letter-spacing="8" fill="#eafcff">LEVEL COMPLETE</text>
+  <text x="540" y="612" text-anchor="middle" font-family="system-ui,sans-serif"
+        font-size="24" font-weight="700" letter-spacing="7" fill="#8ba3c8">LEVEL 24</text>
+
+  <g filter="url(#glow)" fill="url(#gold)">
+    <polygon points="340,760 362,818 424,818 374,854 392,914 340,878 288,914 306,854 256,818 318,818"/>
+    <polygon points="540,740 566,808 640,808 580,850 602,922 540,880 478,922 500,850 440,808 514,808"/>
+    <polygon points="740,760 762,818 824,818 774,854 792,914 740,878 688,914 706,854 656,818 718,818"/>
+  </g>
+
+  <g>
+    <rect x="160" y="1000" width="360" height="150" rx="26"
+          fill="rgba(255,255,255,0.04)" stroke="rgba(120,170,240,0.18)" stroke-width="2"/>
+    <text x="340" y="1076" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="46" font-weight="800" fill="#eafcff">0:31</text>
+    <text x="340" y="1116" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="18" letter-spacing="4" fill="#8ba3c8">TIME</text>
+
+    <rect x="560" y="1000" width="360" height="150" rx="26"
+          fill="rgba(255,255,255,0.04)" stroke="rgba(120,170,240,0.18)" stroke-width="2"/>
+    <text x="740" y="1076" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="46" font-weight="800" fill="#eafcff">18</text>
+    <text x="740" y="1116" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="18" letter-spacing="4" fill="#8ba3c8">MOVES</text>
+
+    <rect x="160" y="1170" width="360" height="150" rx="26"
+          fill="rgba(255,255,255,0.04)" stroke="rgba(120,170,240,0.18)" stroke-width="2"/>
+    <text x="340" y="1246" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="46" font-weight="800" fill="#eafcff">20</text>
+    <text x="340" y="1286" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="18" letter-spacing="4" fill="#8ba3c8">PAR</text>
+
+    <rect x="560" y="1170" width="360" height="150" rx="26"
+          fill="rgba(255,255,255,0.04)" stroke="rgba(120,170,240,0.18)" stroke-width="2"/>
+    <text x="740" y="1246" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="46" font-weight="800" fill="#eafcff">0</text>
+    <text x="740" y="1286" text-anchor="middle" font-family="system-ui,sans-serif"
+          font-size="18" letter-spacing="4" fill="#8ba3c8">HINTS</text>
+  </g>
+
+  <text x="540" y="1372" text-anchor="middle" font-family="system-ui,sans-serif"
+        font-size="22" font-weight="800" letter-spacing="5" fill="#ffc247">
+    NEW BEST TIME!
+  </text>
+
+  <g font-family="system-ui,sans-serif" font-size="26" font-weight="800"
+     letter-spacing="3" text-anchor="middle">
+    <rect x="170" y="1412" width="740" height="98" rx="26"
+          fill="rgba(255,255,255,0.035)" stroke="rgba(120,170,240,0.2)" stroke-width="2"/>
+    <text x="540" y="1474" fill="#dbe7ff">SHARE RESULT</text>
+
+    <rect x="170" y="1526" width="358" height="110" rx="26"
+          fill="rgba(255,255,255,0.035)" stroke="rgba(120,170,240,0.2)" stroke-width="2"/>
+    <text x="349" y="1592" fill="#dbe7ff">REPLAY</text>
+
+    <rect x="552" y="1526" width="358" height="110" rx="26"
+          fill="rgba(20,140,190,0.95)" stroke="rgba(70,230,255,0.65)" stroke-width="3"/>
+    <text x="731" y="1592" fill="#eafcff">NEXT</text>
+  </g>
+</svg>
